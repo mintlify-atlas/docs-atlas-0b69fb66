@@ -1,0 +1,99 @@
+---
+title: prae preview
+description: Start a local development server to preview your generated site
+---
+
+# prae preview
+
+Starts a lightweight local HTTP server to preview your generated works console in the browser.
+
+## Usage
+
+```bash
+prae preview [options]
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `-p, --port <port>` | Port to listen on | `5173` |
+| `--no-open` | Don't automatically open the browser | Opens by default |
+
+## Examples
+
+### Basic preview
+
+Start the server on the default port (5173):
+
+```bash
+prae preview
+```
+
+### Custom port
+
+Run the server on a different port:
+
+```bash
+prae preview --port 8080
+```
+
+### Prevent auto-open
+
+Start the server without opening the browser:
+
+```bash
+prae preview --no-open
+```
+
+## Description
+
+The `preview` command:
+
+1. Serves files from the `dist/` directory
+2. If `dist/index.html` exists, serves it at `/`
+3. If no index file exists, generates a minimal HTML harness with the current theme
+4. Automatically opens your default browser to the preview URL
+5. Keeps the server running until you stop it (Ctrl+C)
+
+## Requirements
+
+The `dist/` directory must exist. If you haven't generated your site yet, run:
+
+```bash
+prae generate
+```
+
+## Server Details
+
+- **No dependencies**: Uses Node's built-in `http` module
+- **Hot reload**: Not included — restart the server to see changes
+- **Cache headers**: Sends `Cache-Control: no-store` to prevent stale content
+- **Content types**: Automatically detects MIME types for common file extensions
+
+## Port Conflicts
+
+If the port is already in use, you'll see:
+
+```
+Port 5173 in use. Try: prae preview --port 5174
+```
+
+Either choose a different port or stop the conflicting process.
+
+## Related Commands
+
+- [`prae generate`](/cli/generate) - Generate the dist/ files
+- [`prae init`](/cli/init) - Initialize a new project
+
+## Development Workflow
+
+```bash
+# Make changes to works.json or config
+prae generate
+
+# Preview in browser
+prae preview
+
+# Stop server (Ctrl+C), make more changes, regenerate
+```

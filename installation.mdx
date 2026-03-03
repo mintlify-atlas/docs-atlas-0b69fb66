@@ -1,0 +1,190 @@
+---
+title: "Installation"
+description: "Install Praetorius globally or use it on-demand with npx to start building your interactive works portfolio."
+---
+
+## Requirements
+
+Before installing Praetorius, ensure your system meets these requirements:
+
+- **Node.js** >= 18.17
+- **npm**, **yarn**, or **pnpm** (any modern package manager)
+
+<Tip>
+Check your Node version with `node --version`. If you need to upgrade, visit [nodejs.org](https://nodejs.org/).
+</Tip>
+
+## Install globally (recommended)
+
+Installing globally gives you the `praetorius` and `prae` commands available from anywhere on your system.
+
+<CodeGroup>
+
+```bash npm
+npm install -g praetorius
+```
+
+```bash yarn
+yarn global add praetorius
+```
+
+```bash pnpm
+pnpm add -g praetorius
+```
+
+</CodeGroup>
+
+<Note>
+Global installation is recommended if you're actively authoring works and generating assets regularly.
+</Note>
+
+### Verify installation
+
+Confirm Praetorius installed successfully:
+
+```bash
+prae --version
+```
+
+You should see the current version number (e.g., `0.2.8`).
+
+### Command aliases
+
+Praetorius provides two command aliases for convenience:
+
+- **`praetorius`** — Full command name
+- **`prae`** — Short alias (recommended for faster typing)
+
+Both commands are identical in functionality:
+
+```bash
+praetorius --help
+prae --help  # Same output
+```
+
+## Use without installing (one-off)
+
+If you want to try Praetorius without a global install, use `npx` to run commands on-demand:
+
+```bash
+npx praetorius@latest --help
+```
+
+<Warning>
+Using `npx` downloads the package each time you run it, which is slower than a global install. This approach is best for one-time testing or CI/CD environments.
+</Warning>
+
+## Updating Praetorius
+
+Keep Praetorius up to date to get the latest features, bug fixes, and skins.
+
+<CodeGroup>
+
+```bash npm
+npm update -g praetorius
+```
+
+```bash yarn
+yarn global upgrade praetorius
+```
+
+```bash pnpm
+pnpm update -g praetorius
+```
+
+</CodeGroup>
+
+<Tip>
+Praetorius includes an update notifier that will alert you when a new version is available.
+</Tip>
+
+## Platform-specific notes
+
+<AccordionGroup>
+  <Accordion title="macOS" icon="apple">
+    If you encounter permission errors during global install, use:
+    
+    ```bash
+    sudo npm install -g praetorius
+    ```
+    
+    Or configure npm to use a user-writable directory (recommended). See [npm's guide on fixing permissions](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally).
+  </Accordion>
+  
+  <Accordion title="Windows" icon="windows">
+    Run your terminal (Command Prompt, PowerShell, or Windows Terminal) as Administrator if you encounter permission errors:
+    
+    1. Right-click your terminal application
+    2. Select **Run as administrator**
+    3. Run the install command
+    
+    Alternatively, use a version manager like [nvm-windows](https://github.com/coreybutler/nvm-windows) to avoid permission issues.
+  </Accordion>
+  
+  <Accordion title="Linux" icon="linux">
+    Depending on your Node installation method, you may need `sudo`:
+    
+    ```bash
+    sudo npm install -g praetorius
+    ```
+    
+    If using [nvm](https://github.com/nvm-sh/nvm), you won't need `sudo`—packages install to your user directory automatically.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found after install" icon="triangle-exclamation">
+    If `prae` or `praetorius` isn't recognized after installation:
+    
+    1. Close and reopen your terminal
+    2. Check that npm's global bin directory is in your PATH:
+       ```bash
+       npm config get prefix
+       ```
+    3. Add the bin directory to your PATH if needed (e.g., `/usr/local/bin` on macOS/Linux, `%APPDATA%\npm` on Windows)
+  </Accordion>
+  
+  <Accordion title="Node version too old" icon="clock">
+    Praetorius requires Node.js >= 18.17. If you see a Node version error:
+    
+    - **Use nvm (recommended):**
+      ```bash
+      nvm install 18
+      nvm use 18
+      npm install -g praetorius
+      ```
+    - **Or download the latest LTS from [nodejs.org](https://nodejs.org/)**
+  </Accordion>
+  
+  <Accordion title="npm install hangs or fails" icon="spinner">
+    Network or registry issues can cause install failures:
+    
+    1. Clear npm cache:
+       ```bash
+       npm cache clean --force
+       ```
+    2. Try again:
+       ```bash
+       npm install -g praetorius
+       ```
+    3. If behind a corporate proxy, configure npm:
+       ```bash
+       npm config set proxy http://proxy.company.com:8080
+       npm config set https-proxy http://proxy.company.com:8080
+       ```
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+Now that Praetorius is installed, you're ready to build your first portfolio:
+
+<Card
+  title="Quickstart Guide"
+  icon="rocket"
+  href="/quickstart"
+>
+  Initialize a project, add works, and generate your first embeddable portfolio in under 5 minutes.
+</Card>

@@ -1,0 +1,258 @@
+---
+title: PDF Page-Follow Synchronization
+description: Deep dive into synchronized PDF navigation during audio playback
+---
+
+Page-follow is Praetorius's signature feature: as audio plays, the PDF viewer automatically jumps to the correct **printed page** of the score. This keeps evaluators, performers, and listeners oriented in the score without manual navigation.
+
+## The Problem
+
+When presenting score-based works online:
+
+1. Evaluators may not know the score
+2. They get lost between playback time and PDF pages
+3. PDF page numbers rarely match the printed page numbers
+4. Manual navigation disrupts listening focus
+
+Page-follow solves this by mapping media time → printed page → actual PDF page.
+
+## Core Concepts
+
+### PDF Start Page
+
+```json
+{
+  "pdfStartPage": 11
+}
+```
+
+**`pdfStartPage`** (`integer`, ≥ 1) — The actual PDF page number where printed page 1 begins.
+
+Many scores have front matter (title pages, program notes, instrumentation). If printed page 1 is PDF page 11, set `pdfStartPage: 11`.
+
+### Media Offset
+
+```json
+{
+  "mediaOffsetSec": -5
+}
+```
+
+**`mediaOffsetSec`** (`integer`) — Time offset between audio start and score start, in seconds.
+
+- **Positive**: Audio has pre-roll (announcements, applause). Score starts at `0:05` of audio → `mediaOffsetSec: 5`
+- **Negative**: Audio starts mid-score. Score bar 1 is at `-0:05` of audio → `mediaOffsetSec: -5`
+- **Zero**: Audio and score start align perfectly
+
+### Page Map
+
+```json
+{
+  "pageMap": [
+    { "at": 0, "page": 1 },
+    { "at": 30, "page": 2 },
+    { "at": "1:15", "page": 3 },
+    { "at": 180, "page": 5 }
+  ]
+}
+```
+
+**`pageMap`** — Array of waypoints mapping media time to printed page numbers.
+
+Each entry:
+- **`at`** (`integer | string`) — Time in seconds (integer) or `mm:ss` format (string)
+- **`page`** (`integer`, ≥ 1) — Printed page number
+
+<Warning>
+  **Constraints:**
+  - Times (`at`) must be strictly increasing
+  - Pages (`page`) must be monotonic (non-decreasing)
+  - Times can use `mm:ss` strings or integer seconds; the CLI normalizes both
+</Warning>
+
+### PDF Delta (Optional)
+
+```json
+{
+  "pdfDelta": -1
+}
+```
+
+**`pdfDelta`** (`integer`, optional) — A constant adjustment applied to all computed PDF page numbers.
+
+Use this for fine-tuning if your `pdfStartPage` calculation is consistently off by a page or two.
+
+## How Page Computation Works
+
+Given a `pageMap` entry `{ at: 30, page: 2 }` with `pdfStartPage: 11`:
+
+1. Printed page 2 starts at 0:30 of media time
+2. Actual PDF page = `pdfStartPage + (printedPage - 1)`
+3. Result: PDF page `11 + (2 - 1) = 12`
+
+If `pdfDelta: -1` is set:
+- Final PDF page = `12 + (-1) = 11`
+
+### Formula
+
+```javascript
+function actualPdfPageOf(printedPage, pdfStartPage, pdfDelta = 0) {
+  return pdfStartPage + (printedPage - 1) + (pdfDelta || 0);
+}
+```
+
+## Full Example
+
+```json
+{
+  "id": 1,
+  "slug": "symphony-no-1",
+  "title": "Symphony No. 1",
+  "oneliner": "A four-movement symphony for orchestra",
+  "audio": "https://cdn.example.com/symphony1.mp3",
+  "pdf": "https://cdn.example.com/symphony1-score.pdf",
+  "score": {
+    "pdfStartPage": 15,
+    "mediaOffsetSec": 10,
+    "pdfDelta": 0,
+    "pageMap": [
+      { "at": 0, "page": 1 },
+      { "at": "0:45", "page": 2 },
+      { "at": "1:30", "page": 3 },
+      { "at": 120, "page": 5 },
+      { "at": 240, "page": 10 }
+    ]
+  }
+}
+```
+
+### Interpretation
+
+- PDF printed page 1 is at PDF page 15
+- Audio has 10 seconds of pre-roll (applause, announcement)
+- At 0:00 of audio (after offset), viewer shows PDF page 15 (printed page 1)
+- At 0:45 of audio, viewer jumps to PDF page 16 (printed page 2)
+- At 1:30 of audio, viewer shows PDF page 17 (printed page 3)
+- And so on...
+
+## Schema Validation
+
+The CLI validates your `score` block with these checks:
+
+```javascript
+function validateScore(score) {
+  const errors = [];
+  if (!(Number(score.pdfStartPage) >= 1)) 
+    errors.push('pdfStartPage must be ≥ 1');
+  
+  if (!Array.isArray(score.pageMap) || score.pageMap.length === 0) 
+    errors.push('pageMap must be a non-empty array');
+  
+  let lastT = -1;
+  let lastP = 0;
+  score.pageMap.forEach((row, i) => {
+    if (!Number.isInteger(row.at) || row.at < 0) 
+      errors.push(`row ${i+1}: time must be integer seconds ≥ 0`);
+    if (!Number.isInteger(row.page) || row.page < 1) 
+      errors.push(`row ${i+1}: page must be integer ≥ 1`);
+    if (row.at <= lastT) 
+      errors.push(`row ${i+1}: times must be strictly increasing`);
+    if (row.page < lastP) 
+      errors.push(`row ${i+1}: pages must be monotonic`);
+    lastT = row.at;
+    lastP = row.page;
+  });
+  
+  return errors;
+}
+```
+
+Run `prae doctor` to check for validation errors.
+
+## Authoring Page Maps
+
+When creating a `pageMap`:
+
+1. **Use the CLI wizard**: `prae add` or `prae edit` guides you through page map creation
+2. **Sample strategically**: You don't need every page—just enough waypoints for smooth navigation
+3. **Test with `prae generate --preview`**: View the page-follow behavior in your browser
+
+### CLI Preview
+
+The CLI can print a preview of your page map:
+
+```
+Preview (printed → actual PDF page):
+ idx  time   printed  actual
+  1    0:00        1      15
+  2    0:45        2      16
+  3    1:30        3      17
+  4    2:00        5      19
+  5    4:00       10      24
+```
+
+This helps you verify the mapping before deployment.
+
+## Normalization
+
+The CLI normalizes `score` data during processing:
+
+```javascript
+function normalizeScore(score) {
+  const pdfStartPage = Number(score.pdfStartPage) >= 1 
+    ? Number(score.pdfStartPage) : 1;
+  const mediaOffsetSec = Number.isFinite(Number(score.mediaOffsetSec)) 
+    ? Number(score.mediaOffsetSec) : 0;
+  const pdfDelta = (score.pdfDelta !== undefined && Number.isFinite(Number(score.pdfDelta))) 
+    ? Number(score.pdfDelta) : undefined;
+  
+  const pageMap = Array.isArray(score.pageMap) 
+    ? score.pageMap.map((row) => {
+        const t = typeof row.at === 'number' 
+          ? row.at 
+          : parseTimeToSecStrict(row.at);
+        return { at: Number(t), page: Number(row.page) };
+      })
+      .filter(r => Number.isFinite(r.at) && Number.isFinite(r.page))
+    : [];
+  
+  pageMap.sort((a, b) => a.at - b.at);
+  
+  const out = { pdfStartPage, mediaOffsetSec, pageMap };
+  if (pdfDelta !== undefined) out.pdfDelta = pdfDelta;
+  return out;
+}
+```
+
+<Note>
+  The CLI auto-sorts your `pageMap` by time, so manual ordering isn't required.
+</Note>
+
+## PDF Viewer Requirements
+
+For page-follow to work:
+
+1. **Use PDF.js or a similar viewer** that exposes page control via URL parameters
+2. **Avoid Google Drive "preview" iframes** — they don't expose page navigation APIs
+3. **Host PDFs on your own CDN** or use a proper viewer service
+
+Recommended pattern: `https://yourcdn.com/viewer.html?file=score.pdf#page=15`
+
+## Troubleshooting
+
+### Pages don't sync
+
+- Verify `pdfStartPage` is correct (check your PDF manually)
+- Ensure `pageMap` times are strictly increasing
+- Run `prae doctor` to validate constraints
+
+### PDF viewer doesn't navigate
+
+- Check if your viewer supports `#page=N` hash navigation
+- Test viewer URL manually: `viewer.html?file=score.pdf#page=5`
+- Use PDF.js-based viewers for guaranteed compatibility
+
+### Off by one/two pages
+
+- Use `pdfDelta` to adjust: `-1` shifts left, `+1` shifts right
+- Double-check `pdfStartPage` against your actual PDF

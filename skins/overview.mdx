@@ -1,0 +1,89 @@
+---
+title: Skins Overview
+description: Introduction to Praetorius UI skins and how to choose the right skin for your portfolio
+---
+
+# Skins Overview
+
+Praetorius provides multiple built-in **skins** (UI themes) to customize how your works are presented. Each skin is designed for specific use cases, from minimal console views to rich portfolio layouts.
+
+## What are Skins?
+
+Skins are complete UI templates that control:
+- Layout and visual design
+- Navigation patterns
+- Media player controls
+- PDF viewer integration
+- Typography and spacing
+
+## Choosing a Skin
+
+Select a skin based on your presentation needs:
+
+<CardGroup cols={2}>
+  <Card title="Console" icon="terminal" href="/skins/console">
+    Terminal-style debugging view for development
+  </Card>
+  
+  <Card title="Vite Breeze" icon="grid" href="/skins/vite-breeze">
+    Liquid glass portfolio with split layout and PDF pane
+  </Card>
+  
+  <Card title="Typefolio" icon="book-open" href="/skins/typefolio">
+    Web-book reader with two-page spread typography
+  </Card>
+  
+  <Card title="Cards & Tabs" icon="table-cells" href="/skins/cards-tabs">
+    Portfolio dashboard with card grid and tabs
+  </Card>
+  
+  <Card title="Docs Reader" icon="book" href="/skins/docs-reader">
+    Spacious documentation UI with navigation and outline
+  </Card>
+  
+  <Card title="Kiosk" icon="desktop" href="/skins/kiosk">
+    Touch-first tiles for demos and galleries
+  </Card>
+  
+  <Card title="TypeScatter" icon="grid-2" href="/skins/typescatter">
+    Type-only poster wall with scatter-to-grid layout
+  </Card>
+</CardGroup>
+
+## Configuring Your Skin
+
+Set your default skin in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "vite-breeze",
+    "allowUrlOverride": true
+  }
+}
+```
+
+## Skin Aliases
+
+Some skins have convenient aliases:
+- `cards-tabs` → `dashboard`
+- `docs-reader` → `docs`
+- `kiosk` → `presentation`
+- `typefolio` → `typography`
+- `typescatter` → `posterboard`
+
+## URL Override
+
+When `allowUrlOverride` is enabled, preview different skins using query parameters:
+
+```
+http://localhost:3000?skin=typefolio
+http://localhost:3000?skin=kiosk
+```
+
+## Source Code
+
+All skin implementations are located in `source/ui/skins/` directory, each containing:
+- `template.html` - HTML structure
+- `style.css` - Skin-specific styles
+- `main.js` - Interactive behavior

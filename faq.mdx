@@ -1,0 +1,160 @@
+---
+title: FAQ
+description: Frequently asked questions about Praetorius
+---
+
+## Frequently Asked Questions
+
+Common questions about using Praetorius for your composition portfolio.
+
+<Accordion title="What is Praetorius?">
+  Praetorius is an interactive, artist-made composition portfolio toolkit with robust PDF and playback support. It's designed for composers, artists, educators, festivals, and universities to publish "score-centric" works pages with synchronized audio, score PDFs with page-follow (auto-snapping to the current printed page), deep links, and clean UIs.
+</Accordion>
+
+<Accordion title="Who is Praetorius for?">
+  Praetorius is built for:
+  - **Composers** creating online portfolios
+  - **Artists** presenting score-based works
+  - **Educators** and universities showcasing student/faculty compositions
+  - **Festivals** and competitions displaying submitted works
+  - Anyone who needs to present musical scores synchronized with audio playback
+</Accordion>
+
+<Accordion title="What makes Praetorius different from other portfolio tools?">
+  Praetorius focuses on the primary evidence of score-based works: **the work as score + sound, tightly synchronized**. The PDF page-follow feature automatically snaps to the correct printed page while audio plays, so evaluators aren't lost between time and page, and you aren't judged on secondary characteristics.
+</Accordion>
+
+<Accordion title="Do I need to host my own media files?">
+  Yes. Praetorius **does not host** your media files. You own and host your own audio and PDF assets. Praetorius orchestrates them into a cohesive presentation. You can use your own server, a CDN, or any file hosting service that supports direct links and CORS.
+</Accordion>
+
+<Accordion title="Can I use Praetorius with Squarespace, WordPress, or other site builders?">
+  Absolutely! Praetorius is designed to be **site-builder friendly**. You can paste a single code snippet (generated with `prae generate --embed`) into a Code/HTML block in:
+  - Squarespace
+  - WordPress
+  - Webflow
+  - Any platform that allows custom HTML/JavaScript
+  
+  The strict CSS tokens prevent theme collisions.
+</Accordion>
+
+<Accordion title="What is PDF page-follow and how does it work?">
+  PDF page-follow automatically jumps the PDF viewer to the correct printed page while audio plays. You define waypoints in your `works.json` that map media timestamps to printed page numbers:
+  
+  ```json
+  "pageMap": [
+    { "at": "0:30", "page": 1 },
+    { "at": "7:49", "page": 10 }
+  ]
+  ```
+  
+  Praetorius interpolates between waypoints to keep the PDF synchronized throughout playback.
+</Accordion>
+
+<Accordion title="What are skins and which should I choose?">
+  Skins are different visual presentations of your works data. You can regenerate with a different skin at any time—your data stays the same. Available skins include:
+  
+  - **console** (default): Terminal-style console/takeover UX with commands
+  - **vite-breeze**: Modern "liquid glass" portfolio UI
+  - **docs-reader**: Reader layout for long-form notes + preview
+  - **cards-tabs**: Card grid with tabbed details
+  - **kiosk**: Fullscreen, minimal, for exhibitions or on-site use
+  - **typefolio**: Editorial spread with a live preview pane
+  - **typescatter**: Free-form/scatter presentation with focus on titles
+  
+  Choose based on your presentation context and aesthetic preferences.
+</Accordion>
+
+<Accordion title="Can I change skins later without losing my data?">
+  Yes! Your works data is stored separately in `.prae/works.json`. You can regenerate your portfolio with a different skin at any time:
+  
+  ```bash
+  prae generate --skin typefolio --out dist
+  ```
+</Accordion>
+
+<Accordion title="How do I add cue points to my works?">
+  Cue points can be added during `prae add` or by editing your `works.json` directly. Two formats are supported:
+  
+  ```json
+  "cues": [
+    { "label": "Movement I", "t": 0 },
+    { "label": "@10:30", "t": 630 }
+  ]
+  ```
+  
+  Or use the `@mm:ss` shorthand in labels for quick visual reference.
+</Accordion>
+
+<Accordion title="What file formats are supported for audio and PDFs?">
+  - **Audio**: MP3, AAC, OGG, or any format supported by modern browsers' `<audio>` element
+  - **PDFs**: Standard PDF files, ideally hosted with CORS support for cross-origin access
+  
+  For best compatibility, use MP3 for audio.
+</Accordion>
+
+<Accordion title="Can I create deep links to specific works or timestamps?">
+  Yes! Praetorius supports deep linking:
+  
+  - Link to a work: `yoursite.com#work-soundnoisemusic`
+  - Link with timestamp: `yoursite.com#work-soundnoisemusic?t=630` (10:30)
+  
+  The UI will activate the correct work and seek to the specified time.
+</Accordion>
+
+<Accordion title="How do I validate my works.json configuration?">
+  Use the built-in doctor command:
+  
+  ```bash
+  prae doctor
+  ```
+  
+  This validates your schema, mapping, and links, and prints actionable guidance for any issues found.
+</Accordion>
+
+<Accordion title="Can I import/export my works data?">
+  Yes! Praetorius supports both JSON and CSV formats:
+  
+  ```bash
+  # Export
+  prae export --format json
+  prae export --format csv
+  
+  # Import
+  prae import my-works.json
+  prae import my-works.csv
+  ```
+</Accordion>
+
+<Accordion title="Is Praetorius accessible?">
+  Yes! Praetorius includes:
+  - **ARIA support**: Preview/HUD announce via `aria-live`; controls are labeled
+  - **Keyboard navigation**: Arrow keys to change selection; Esc closes drawers
+  - **Color contrast**: Strict light/dark tokens for predictable contrast
+  - **Performance**: Audio loads lazily; PDF viewer is iframed to isolate work
+</Accordion>
+
+<Accordion title="Does Praetorius include analytics or tracking?">
+  No. Praetorius is a **non-goal** for hosting, analytics, or authentication. You own your assets and data. If you need analytics, integrate your own tracking solution (Google Analytics, Plausible, etc.) on the page where you embed Praetorius.
+</Accordion>
+
+<Accordion title="What's the license? Can I use it commercially?">
+  Praetorius is licensed under the MIT License, which means:
+  - ✓ Commercial use allowed
+  - ✓ Modification allowed
+  - ✓ Distribution allowed
+  - ✓ Private use allowed
+  
+  See the [Contributing](/contributing) page for more details.
+</Accordion>
+
+<Accordion title="How do I get help or report bugs?">
+  - Check the [Troubleshooting](/troubleshooting) page for common issues
+  - Search [GitHub Issues](https://github.com/cbassuarez/praetorius/issues) for similar problems
+  - Open a new issue with a minimal reproducible example
+  - Include your `works.json` sample and any relevant error messages
+</Accordion>
+
+<Accordion title="Can I contribute to Praetorius?">
+  Yes! Issues and PRs are welcome. See the [Contributing](/contributing) page for guidelines. Unit tests for time parsing and score validation are especially helpful.
+</Accordion>

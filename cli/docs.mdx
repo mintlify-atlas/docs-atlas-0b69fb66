@@ -1,0 +1,194 @@
+---
+title: prae docs
+description: Interactive wizard for configuring the Docs Reader skin
+---
+
+# prae docs
+
+Launches an interactive wizard to configure the Docs Reader skin, including content sources, navigation structure, search, and Works integration.
+
+## Usage
+
+```bash
+prae docs [options]
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--docs-root <dir>` | Docs content root directory | `docs/` |
+| `--docs-scan <globs>` | Comma-separated markdown glob patterns | Auto-detected |
+| `--docs-home <source>` | Homepage source (README.md, file path, or section slug) | Auto |
+| `--docs-works <modes>` | Works integration modes (nav,home,skip,auto,internal,external) | `auto` |
+| `--docs-search <engine>` | Search engine (light\|fuse\|none) | `light` |
+| `--docs-fields <fields>` | Comma-separated search fields | `title,headings,body,summary` |
+| `--docs-alt-policy <policy>` | Alt text policy (require\|warn\|auto) | `warn` |
+| `--docs-tabs <mode>` | Code tabs mode (off\|fence\|snippets) | `off` |
+| `--yes` | Accept defaults and skip interactive prompts | `false` |
+
+## Description
+
+The `docs` command is a comprehensive wizard for the **Docs Reader** skin. It helps you:
+
+1. **Configure site identity** - Title, subtitle, description, and accent color
+2. **Set up content sources** - Markdown files to include/exclude
+3. **Build information architecture** - Organize pages into sections
+4. **Configure search** - Enable and customize documentation search
+5. **Integrate Works** - Display musical works in docs navigation and homepage
+6. **Set asset policies** - Image optimization and alt text requirements
+7. **Enable code tabs** - Multi-language code examples
+
+## Interactive Wizard
+
+When you run `prae docs`, you'll be guided through:
+
+### 1. Content Detection
+
+The wizard automatically scans for:
+- Markdown files in the docs root
+- README sections
+- Asset directories
+- Existing works data
+
+### 2. Site Configuration
+
+```
+? Site title: My Documentation
+? Subtitle: Developer Guide
+? Description: Complete guide for developers
+? Accent color (hex): #3b82f6
+```
+
+### 3. Content Sources
+
+```
+? Markdown glob patterns: docs/**/*.md
+? Include README sections: yes
+```
+
+### 4. Information Architecture
+
+Organize pages into sections with custom ordering and visibility.
+
+### 5. Search Configuration
+
+```
+? Enable search: yes
+? Search engine: light
+? Search fields: title, headings, body, summary
+```
+
+### 6. Works Integration
+
+```
+? Include works in navigation: yes
+? Show works on homepage: yes
+? Link mode: auto
+```
+
+## Non-Interactive Mode
+
+Use `--yes` to accept all defaults:
+
+```bash
+prae docs --yes
+```
+
+This is useful for:
+- CI/CD pipelines
+- Automated setup scripts
+- Quick initialization with sensible defaults
+
+## Output
+
+The wizard creates or updates `.prae/docs.json` with your configuration:
+
+```json
+{
+  "site": {
+    "title": "My Documentation",
+    "subtitle": "Developer Guide",
+    "description": "Complete guide for developers",
+    "accent": "#3b82f6"
+  },
+  "sources": {
+    "globs": ["docs/**/*.md"],
+    "includeReadme": true
+  },
+  "ia": [
+    {
+      "id": "getting-started",
+      "title": "Getting Started",
+      "order": 0,
+      "pages": [...]
+    }
+  ],
+  "search": {
+    "enabled": true,
+    "engine": "light"
+  },
+  "works": {
+    "includeInNav": true,
+    "includeOnHome": true
+  }
+}
+```
+
+## Starter Content
+
+If no markdown files are found, the wizard offers to scaffold a starter documentation set:
+
+```
+? No docs found. Scaffold a starter docs set? yes
+```
+
+This creates:
+- `docs/index.md` - Homepage
+- `docs/getting-started.md` - Getting started guide
+- `docs/guide/` - Tutorial directory
+
+## Auto-Trigger
+
+The wizard is automatically triggered when:
+1. You run `prae generate --skin docs-reader`
+2. No `.prae/docs.json` exists
+
+## Related Commands
+
+- [`prae generate`](/cli/generate) - Generate the docs site
+- [`prae preview`](/cli/preview) - Preview the docs locally
+- [Works JSON](/configuration/works-json) - Configure your works database
+
+## Use Cases
+
+### Documentation Site
+
+Create a standalone documentation site:
+
+```bash
+prae docs --docs-works skip
+```
+
+### Portfolio with Docs
+
+Integrate documentation with your musical works:
+
+```bash
+prae docs --docs-works home,nav
+```
+
+### Multi-Language Code Examples
+
+Enable code tabs for examples in multiple languages:
+
+```bash
+prae docs --docs-tabs fence
+```
+
+## Tips
+
+- Run the wizard again to update your configuration
+- The wizard preserves existing settings as defaults
+- Use `--yes` for CI/CD automation
+- Review `.prae/docs.json` to understand the configuration structure

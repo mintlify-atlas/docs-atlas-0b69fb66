@@ -1,0 +1,258 @@
+---
+title: prae generate
+description: Build production-ready assets from works database
+---
+
+# prae generate
+
+Generate production-ready JavaScript, CSS, and HTML from `.prae/works.json` and `.prae/config.json`.
+
+## Syntax
+
+```bash
+prae generate [options]
+prae build  # alias
+```
+
+## Options
+
+### Output Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `-o, --out <dir>` | Output directory | `dist` |
+| `--js <file>` | JavaScript output filename | `script.js` |
+| `--css <file>` | CSS output filename | `styles.css` |
+| `--no-css` | Skip CSS output (non-embed mode) | `false` |
+
+### Build Modes
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--embed` | Generate single HTML snippet (inline) | `false` |
+| `--minify` | Minify JS/CSS using esbuild | `false` |
+| `--watch` | Watch files and rebuild on change | `false` |
+
+### UI Skin Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--skin <name>` | Override skin (see below) | `console` |
+| `--ui-src <dir>` | UI source directory | `ui` |
+| `--html <file>` | Template filename in --ui-src | `template.html` |
+| `--app-js <file>` | UI JS output filename | `app.js` |
+| `--app-css <file>` | UI CSS output filename | `app.css` |
+| `--no-ui` | Skip UI bundle entirely | `false` |
+
+### Seed Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--seed <mode>` | Starter content seeding | `auto` |
+| `--allow-fallback` | Use seed on validation failure | `false` |
+
+## Supported Skins
+
+| Skin | Aliases | Description |
+|------|---------|-------------|
+| `vite-breeze` | - | Liquid Glass portfolio shell (split layout + PDF pane) |
+| `docs-reader` | `docs` | Spacious docs UI (left nav, right outline, copy-on-code) |
+| `cards-tabs` | `dashboard` | Portfolio dashboard (cards + tabs from works list) |
+| `kiosk` | `presentation` | Touch-first tiles for demos/galleries |
+| `typefolio` | `typography` | Web-book reader (two-page spread, Caslon typography) |
+| `typescatter` | `posterboard` | Type-only poster wall (draggable, scatter/grid toggle) |
+| `console` | - | Console view for debugging/starters |
+
+## Seed Modes
+
+| Mode | Behavior |
+|------|----------|
+| `auto` | Seed only if no works found |
+| `always` | Always apply starter seed (non-destructive) |
+| `never` | Never seed, even if empty |
+
+## Examples
+
+### Basic generation
+
+```bash
+prae generate
+```
+
+Outputs to `dist/`:
+- `dist/script.js`
+- `dist/styles.css`
+- `dist/index.html` (if UI template found)
+- `dist/app.js` (if UI source found)
+- `dist/app.css` (if UI source found)
+
+### Custom output directory
+
+```bash
+prae generate -o build
+```
+
+### Minified production build
+
+```bash
+prae generate --minify
+```
+
+Requires `esbuild` package:
+
+```bash
+npm install esbuild
+```
+
+### Embed mode for Squarespace
+
+```bash
+prae generate --embed -o paste
+```
+
+Creates `paste/embed.html` with inline styles and scripts. Paste into a Squarespace Code block.
+
+### Specific skin
+
+```bash
+prae generate --skin vite-breeze
+prae generate --skin docs-reader
+prae generate --skin kiosk
+```
+
+### Watch mode for development
+
+```bash
+prae generate --watch
+```
+
+Watches:
+- `.prae/works.json`
+- `.prae/config.json`
+- `ui/**/*` (UI source files)
+
+Rebuild triggers automatically on changes.
+
+### Generate data only (no UI)
+
+```bash
+prae generate --no-ui
+```
+
+Outputs only `script.js` and `styles.css`.
+
+### Custom filenames
+
+```bash
+prae generate --js works-data.js --css works-theme.css
+```
+
+## Output Structure
+
+### Standard Build
+
+```
+dist/
+├── index.html      # Main page (if template found)
+├── script.js       # Works data + runtime
+├── styles.css      # Theme tokens + base styles
+├── app.js          # UI application code
+├── app.css         # Skin-specific styles
+└── lib/            # Additional assets (if present)
+```
+
+### Embed Mode
+
+```
+paste/
+└── embed.html      # Self-contained snippet
+```
+
+## Build Process
+
+1. **Load configuration** - Reads `.prae/config.json`
+2. **Seed check** - Auto-seeds if no works found (unless `--seed=never`)
+3. **Validate** - Schema check on `.prae/works.json`
+4. **Generate runtime** - Creates works payload
+5. **Minify** (optional) - Transforms JS/CSS via esbuild
+6. **Bundle UI** (if templates found) - Injects data, compiles assets
+7. **Write output** - Atomically writes files with `.bak` backups
+
+## Validation
+
+Generate performs schema validation. On failure:
+
+```
+DB validation failed:
+  - /works/0/title must NOT have fewer than 1 characters
+```
+
+Fix errors or use `--allow-fallback` to render with demo data.
+
+## Embed Mode Output
+
+The `--embed` flag generates a single HTML file:
+
+```html
+<!-- Praetorius embed: paste into a Squarespace Code block -->
+<style>
+/* Inlined theme tokens + styles */
+</style>
+<script>
+(function(){...})(); // Theme setup
+</script>
+<script>
+(function(){...})(); // Works data
+</script>
+<script>
+(function(){...})(); // Render logic
+</script>
+```
+
+Paste entire file into a Squarespace Code block.
+
+## Watch Mode
+
+```bash
+prae generate --watch
+```
+
+Output:
+
+```
+write dist/script.js
+write dist/styles.css
+write dist/index.html
+write dist/app.js
+write dist/app.css
+Generated vite-breeze to dist (works: 3, seeded: no)
+watching .prae and ui for changes…
+```
+
+On file change:
+
+```
+rebuild (change: .prae/works.json)
+write dist/script.js
+Generated vite-breeze to dist (works: 4, seeded: no)
+```
+
+Process stays alive until Ctrl+C.
+
+## Docs Reader Wizard
+
+When `--skin docs-reader` selected and no `.prae/docs.json` exists, the Docs Reader wizard launches automatically:
+
+```
+Docs Reader skin selected but no docs configuration found.
+Launching Docs Reader wizard…
+```
+
+See [prae docs](/cli/docs) for wizard details.
+
+## See Also
+
+- [prae preview](/cli/preview) - Serve local preview
+- [prae validate](/cli/validate) - Check database before generate
+- [prae list](/cli/list) - Review works to be generated
+- [prae init](/cli/init) - Initialize project structure

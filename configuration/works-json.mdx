@@ -1,0 +1,291 @@
+---
+title: works.json Reference
+description: Complete reference for the .prae/works.json file structure, field definitions, and validation rules
+---
+
+The `.prae/works.json` file is the central data store for your Praetorius project. It contains all work definitions, metadata, and configuration in a single JSON file.
+
+## File Location
+
+The works manifest is always located at:
+
+```
+.prae/works.json
+```
+
+This file is created automatically when you run `prae init` or `prae add` for the first time.
+
+## Schema Structure
+
+The works.json file follows a strict schema with two top-level properties:
+
+<ParamField path="version" type="integer" required>
+  Schema version number. Current version is `1`. Used for future migrations.
+</ParamField>
+
+<ParamField path="works" type="array" required>
+  Array of work objects. Each work represents a composition or piece in your portfolio.
+</ParamField>
+
+## Work Object Fields
+
+Each work in the `works` array supports the following fields:
+
+### Required Fields
+
+<ParamField path="id" type="integer" required>
+  Unique numeric identifier for the work. Must be ≥ 1.
+  
+  **Validation:**
+  - Must be a positive integer
+  - Must be unique across all works
+  - Cannot be changed after creation (used for deep linking)
+</ParamField>
+
+<ParamField path="slug" type="string" required>
+  URL-safe identifier used for deep linking. Must be at least 1 character.
+  
+  **Validation:**
+  - Minimum length: 1 character
+  - Should be lowercase with hyphens (e.g., `"string-quartet-no-2"`)
+  - Must be unique across all works
+  - Auto-generated from title if not provided
+  
+  **Example:** `"soundnoisemusic"`
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Display title of the work. Must be at least 1 character.
+  
+  **Example:** `"String Quartet No. 2 — SOUNDNOISEMUSIC"`
+</ParamField>
+
+<ParamField path="oneliner" type="string">
+  Short description (one-liner) of the work. Maximum 240 characters, no newlines.
+  
+  **Validation:**
+  - Maximum length: 240 characters
+  - Pattern: `^[^\n]*$` (no newlines allowed)
+  - Either `oneliner` or `one` is required
+  
+  **Example:** `"A through-composed/indeterminate quartet exploring texture and rhythm"`
+</ParamField>
+
+<ParamField path="one" type="string">
+  Alternative field name for oneliner. Same validation rules apply.
+  
+  **Note:** Use either `oneliner` or `one`, not both. The `oneliner` field is preferred.
+</ParamField>
+
+### Optional Fields
+
+<ParamField path="description" type="string | array | null">
+  Extended description of the work. Can be:
+  - A single string (supports newlines)
+  - An array of strings (each element treated as a paragraph)
+  - `null` to explicitly indicate no description
+  
+  **Example (string):**
+  ```json
+  "description": "Composed in 2023, this quartet explores..."
+  ```
+  
+  **Example (array):**
+  ```json
+  "description": [
+    "First paragraph about the work's genesis.",
+    "Second paragraph discussing the techniques."
+  ]
+  ```
+</ParamField>
+
+<ParamField path="desc" type="string | array | null">
+  Alternative field name for description. Same behavior as `description`.
+  
+  **Note:** Use `description` instead of `desc` for consistency.
+</ParamField>
+
+<ParamField path="audio" type="string | null">
+  URL to the audio file for this work. Supports common formats (MP3, OGG, WAV).
+  
+  **Example:** `"https://cdn.example.com/audio/quartet-no-2.mp3"`
+  
+  <Info>For best compatibility, use widely-supported formats like MP3. Host audio on a CDN or reliable server with CORS enabled.</Info>
+</ParamField>
+
+<ParamField path="pdf" type="string | null">
+  URL to the score PDF for this work.
+  
+  **Example:** `"https://cdn.example.com/scores/quartet-no-2.pdf"`
+  
+  <Warning>For page-follow functionality to work, the PDF must be accessible via a direct URL. Google Drive "preview" URLs do not support page navigation.</Warning>
+</ParamField>
+
+<ParamField path="cues" type="array">
+  Array of timestamp cues/markers for the work. Each cue object has:
+  
+  **Cue Object Structure:**
+  - `label` (string, required): Display label for the cue
+  - `t` (integer, required): Time in seconds (≥ 0)
+  
+  **Example:**
+  ```json
+  "cues": [
+    { "label": "@0:00", "t": 0 },
+    { "label": "@10:30", "t": 630 },
+    { "label": "Coda", "t": 842 }
+  ]
+  ```
+</ParamField>
+
+<ParamField path="score" type="object">
+  Configuration for PDF page-follow synchronization. See [Score Mapping](/configuration/score-mapping) for complete reference.
+  
+  **Quick Overview:**
+  - `pdfStartPage`: PDF page number where printed page 1 begins
+  - `mediaOffsetSec`: Time offset if audio doesn't start at 0:00
+  - `pageMap`: Array of time → page mappings
+  - `pdfDelta`: Optional fine-tuning adjustment
+</ParamField>
+
+## Complete Example
+
+Here's a complete example of a works.json file with two works:
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "soundnoisemusic",
+      "title": "String Quartet No. 2 — SOUNDNOISEMUSIC",
+      "oneliner": "A through-composed/indeterminate quartet exploring texture",
+      "description": [
+        "Composed in 2023, this work explores the boundaries between sound, noise, and music.",
+        "The quartet alternates between traditional notation and graphic scores."
+      ],
+      "audio": "https://cdn.example.com/audio/sq2.mp3",
+      "pdf": "https://cdn.example.com/scores/sq2.pdf",
+      "cues": [
+        { "label": "@0:00", "t": 0 },
+        { "label": "Movement II", "t": 420 },
+        { "label": "Coda", "t": 780 }
+      ],
+      "score": {
+        "pdfStartPage": 11,
+        "mediaOffsetSec": 0,
+        "pageMap": [
+          { "at": "0:30", "page": 1 },
+          { "at": "2:15", "page": 5 },
+          { "at": "7:49", "page": 10 }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "slug": "piano-variations",
+      "title": "Variations for Piano",
+      "oneliner": "Seven variations on an original theme",
+      "audio": "https://cdn.example.com/audio/piano-vars.mp3",
+      "pdf": null,
+      "cues": [
+        { "label": "Theme", "t": 0 },
+        { "label": "Var. 1", "t": 45 },
+        { "label": "Var. 2", "t": 98 }
+      ]
+    }
+  ]
+}
+```
+
+## Validation Rules
+
+### Schema Validation
+
+The CLI uses JSON Schema validation (via AJV) to enforce structure:
+
+- Top-level `version` and `works` are required
+- Each work must have `id`, `slug`, `title`
+- Each work must have either `oneliner` or `one`
+- Field types must match (integers for id/t, strings for text fields)
+- No additional properties allowed (prevents typos)
+
+### Business Rules
+
+<Warning>
+**Common validation errors:**
+
+- **Duplicate IDs:** Each work must have a unique integer ID
+- **Invalid slugs:** Must be non-empty and unique
+- **Oneliner length:** Must be ≤ 240 characters and contain no newlines
+- **Cue times:** Must be non-negative integers in seconds
+- **Score pageMap:** Times must be strictly increasing
+</Warning>
+
+### Running Validation
+
+To validate your works.json file, use the doctor command:
+
+```bash
+prae doctor
+```
+
+This will check:
+- Schema compliance
+- URL accessibility
+- Score mapping validity
+- Duplicate detection
+
+## File Management
+
+### Atomic Writes
+
+The CLI uses atomic file writes to prevent corruption:
+
+1. Creates a temporary file with new content
+2. Backs up existing works.json to `.bak`
+3. Atomically renames temp file to works.json
+
+This ensures you never lose data if a write fails.
+
+### History & Snapshots
+
+Automatic snapshots are saved to `.prae/history/` before destructive operations:
+
+```bash
+.prae/
+├── works.json
+└── history/
+    ├── 2024-03-03T10-30-00-000Z--edit.json
+    ├── 2024-03-03T11-15-00-000Z--remove.json
+    └── 2024-03-03T14-20-00-000Z--import.json
+```
+
+You can restore from a snapshot if needed.
+
+## Migrations
+
+When schema versions change, the CLI automatically migrates your data:
+
+- **v1 → v2:** Normalizes IDs, slugs, cues, and score blocks
+- Future versions will be handled transparently
+
+<Info>Always commit your works.json to version control. The CLI preserves backward compatibility across schema versions.</Info>
+
+## Best Practices
+
+1. **Use meaningful slugs:** Choose memorable, descriptive slugs for deep linking
+2. **Keep oneliners concise:** Stay well under the 240-character limit
+3. **Host assets reliably:** Use CDNs or reliable servers for audio/PDF URLs
+4. **Validate regularly:** Run `prae doctor` before generating
+5. **Commit often:** Keep works.json in version control
+6. **Use cues strategically:** Add cues at major sections or points of interest
+
+## Related
+
+- [Score Mapping Configuration](/configuration/score-mapping)
+- [Deep Linking](/configuration/deep-linking)
+- [Adding Works Guide](/guides/adding-works)
+- [CLI: add command](/cli/add)
+- [CLI: doctor command](/cli/doctor)

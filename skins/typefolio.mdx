@@ -1,0 +1,136 @@
+---
+title: Typefolio Skin
+description: Web-book reader with two-page spread layout and Caslon-style typography
+---
+
+# Typefolio Skin
+
+The **Typefolio** skin transforms your portfolio into a web-book reader with classic two-page spread layout and elegant typography.
+
+## Overview
+
+Typefolio presents works as a digital book with:
+- Two-page spread layout (recto/verso pages)
+- Caslon-style serif typography
+- Page-by-page navigation
+- Integrated PDF preview drawer
+- Book-like reading experience
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Reading Experience" icon="book-open">
+    Present works as chapters in a cohesive narrative
+  </Card>
+  
+  <Card title="Long-Form Content" icon="scroll">
+    Ideal for detailed descriptions and program notes
+  </Card>
+  
+  <Card title="Classical Aesthetic" icon="landmark">
+    Traditional typography for formal presentations
+  </Card>
+  
+  <Card title="Print-Like Layout" icon="file-lines">
+    Two-page spread mimics physical book experience
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Typography**: Caslon-style serif fonts with refined spacing
+- **Layout**: Two-page spread (left/right pages)
+- **Navigation**: Page counter and playback controls in footer
+- **PDF Preview**: Slide-out drawer panel
+- **Theme**: Light and dark modes with subtle transitions
+
+## Generation Example
+
+```bash
+# Generate with Typefolio skin
+praetorius generate --skin typefolio
+
+# Using alias
+praetorius generate --skin typography
+```
+
+## Configuration
+
+Set Typefolio as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "typefolio",
+    "allowUrlOverride": true
+  },
+  "site": {
+    "fullName": "Composer Name",
+    "copyrightName": "© 2024 Composer Name"
+  }
+}
+```
+
+## Key Features
+
+### Two-Page Spread
+Works flow across facing pages like a physical book, with recto (right) and verso (left) page styles.
+
+### Page Navigation
+Footer displays current page and total page count (`0/5` format).
+
+### PDF Preview Drawer
+Slide-out panel (`#tf-preview`) shows PDF previews without disrupting the reading flow.
+
+### Typography Controls
+Optimized line length, leading, and hierarchy for long-form reading.
+
+### Play Controls
+Integrated audio playback button in footer (hidden when no audio available).
+
+## HTML Structure
+
+```html
+<header id="tf-head" class="tf-head">
+  <span class="tf-head-site">Praetorius</span>
+  <span class="tf-head-dash">—</span>
+  <span id="tf-current-title" class="tf-head-current"></span>
+  <button id="tf-preview-drawer-toggle">Preview</button>
+  <button id="wc-theme-toggle" class="tf-theme-toggle">☀︎</button>
+</header>
+
+<div class="tf-stage">
+  <main id="tf-book" class="tf-book">
+    <div id="tf-flow" class="tf-flow"></div>
+  </main>
+  <aside id="tf-preview" class="tf-preview">
+    <!-- PDF preview iframe -->
+  </aside>
+</div>
+
+<footer id="tf-foot" class="tf-foot">
+  <span class="tf-foot-pages">
+    <span id="tf-page-now">0</span>/<span id="tf-page-total">0</span>
+  </span>
+  <button id="tf-foot-play" class="tf-foot-play">Play ▷</button>
+</footer>
+```
+
+## CSS Classes
+
+- `.tf-book` - Main book container
+- `.tf-flow` - Content flow container for pages
+- `.tf-preview` - PDF preview drawer
+- `.tf-foot-pages` - Page counter display
+- `.tf-theme-toggle` - Theme switcher button
+
+## Source Location
+
+Implementation: `source/ui/skins/typefolio/`
+- `template.html` - Book structure with spread layout
+- `style.css` - Typography and page styles
+- `main.js` - Page flow and preview logic
+
+<Note>
+Typefolio uses the `typography` alias for convenience.
+</Note>

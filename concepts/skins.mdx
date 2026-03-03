@@ -1,0 +1,337 @@
+---
+title: UI Skins System
+description: Overview of Praetorius's UI skin architecture and available skins
+---
+
+Praetorius renders the same works data across multiple **skins**—pre-built UI themes optimized for different contexts and aesthetics. Choose a skin at generation time to match your artistic vision or deployment context.
+
+## What Are Skins?
+
+A skin is a complete UI implementation consisting of:
+
+- **`template.html`** — HTML structure and semantic layout
+- **`style.css`** — Visual styling and theme tokens
+- **`main.js`** — Interactivity, routing, and UI logic
+
+All skins:
+
+- Read from the same `window.PRAE.works` data structure
+- Support light/dark themes
+- Include accessibility features (ARIA labels, keyboard navigation)
+- Work in Squarespace code blocks or static hosting
+
+## Available Skins
+
+Praetorius includes 7 built-in skins, each optimized for different use cases:
+
+### Console (Default)
+
+**Key:** `console`
+
+**Purpose:** Terminal-style debugging and starter scaffold UI
+
+**Best for:**
+- Development and testing
+- Minimal deployments
+- Debugging data structure issues
+
+**Features:**
+- Monospace typography
+- Command-line aesthetics
+- Compact, list-based layout
+- Toast notifications for user feedback
+
+**Theme:** Dark by default
+
+---
+
+### Vite Breeze
+
+**Key:** `vite-breeze`  
+**Aliases:** None
+
+**Purpose:** Liquid glass portfolio shell with split layout and PDF pane
+
+**Best for:**
+- Modern portfolio sites
+- Showcasing visual design alongside music
+- Professional composer websites
+
+**Features:**
+- Glassmorphism effects (frosted glass panels)
+- Split-pane layout (works list + detail view)
+- Integrated PDF viewer pane
+- Smooth animations and transitions
+- HUD (heads-up display) for playback controls
+
+**Theme:** Light by default
+
+---
+
+### Cards & Tabs
+
+**Key:** `cards-tabs`  
+**Aliases:** `dashboard`
+
+**Purpose:** Portfolio dashboard with card grid and tabbed details
+
+**Best for:**
+- Multi-work portfolios
+- Quick browsing and comparison
+- Festival program listings
+
+**Features:**
+- Card grid layout for work listings
+- Tabbed interface for details, cues, playback, and score
+- Responsive grid (adapts to screen size)
+- Hash-based routing (`#work=slug&tab=details`)
+
+**Theme:** Dark by default
+
+---
+
+### Docs Reader
+
+**Key:** `docs-reader`  
+**Aliases:** `docs`
+
+**Purpose:** Spacious documentation UI with left nav and right outline
+
+**Best for:**
+- Program notes and analysis
+- Educational materials
+- Long-form composition documentation
+
+**Features:**
+- Three-column layout (nav, content, outline)
+- Copy-on-click for code blocks
+- Automatic table of contents generation
+- Long-form reading optimizations
+
+**Theme:** Light by default
+
+<Warning>
+  The `docs-reader` skin is optimized for markdown content. If using this skin with works data, ensure `description` fields contain rich narrative content.
+</Warning>
+
+---
+
+### Kiosk
+
+**Key:** `kiosk`  
+**Aliases:** `presentation`
+
+**Purpose:** Touch-first tiles for demos, galleries, and public installations
+
+**Best for:**
+- Gallery installations
+- Conference presentations
+- Public kiosks and touchscreens
+
+**Features:**
+- Oversized touch targets
+- Fullscreen mode
+- Minimal chrome (no extraneous UI)
+- High-contrast, bold typography
+- Idle timeout and auto-reset
+
+**Theme:** Dark by default
+
+---
+
+### Typefolio
+
+**Key:** `typefolio`  
+**Aliases:** `typography`
+
+**Purpose:** Web-book reader with two-page spread and Caslon-style typography
+
+**Best for:**
+- Editorial-focused presentations
+- Score study environments
+- High-design portfolio sites
+
+**Features:**
+- Two-page spread layout (mimics printed books)
+- Caslon-inspired serif typography
+- Generous whitespace and margins
+- Integrated live preview pane
+- Page-turn animations
+
+**Theme:** Light by default
+
+---
+
+### TypeScatter
+
+**Key:** `typescatter`  
+**Aliases:** `posterboard`
+
+**Purpose:** Type-only poster wall with scatter-to-grid layout and draggable elements
+
+**Best for:**
+- Experimental portfolios
+- Visual exploration of work relationships
+- Interactive gallery experiences
+
+**Features:**
+- Draggable work titles
+- Scatter → grid layout transitions
+- Type-as-interface (no images)
+- Randomized initial positions
+- Gesture-based interactions
+
+**Theme:** Light by default
+
+---
+
+## Selecting a Skin
+
+Choose a skin at generation time with the `--skin` flag:
+
+```bash
+# Default (console)
+prae generate --out dist
+
+# Specific skin
+prae generate --skin vite-breeze --out dist
+
+# Using an alias
+prae generate --skin dashboard --out dist
+```
+
+You can regenerate with a different skin at any time—your data remains unchanged.
+
+## Skin Architecture
+
+All skins follow the same structural pattern:
+
+```
+ui/skins/<skin-name>/
+├── template.html  # Semantic HTML structure
+├── style.css      # Visual styling + theme tokens
+└── main.js        # UI logic, routing, interactions
+```
+
+### Data Contract
+
+Skins read from the global `window.PRAE` object:
+
+```javascript
+window.PRAE = {
+  works: [...],           // Array of work objects
+  worksById: {...},       // Map of id → work
+  pageFollowMaps: {...},  // Map of slug → pageFollow config
+  config: {
+    theme: 'dark',        // 'light' or 'dark'
+    site: {...}           // Site metadata
+  },
+  warnings: [...]         // Validation warnings
+};
+```
+
+### Theme Tokens
+
+All skins support light/dark themes via CSS custom properties:
+
+```css
+/* Dark theme */
+.prae-theme-dark {
+  --bg: #0f0f0f;
+  --fg: #fff;
+  --dim: #8a8a8a;
+  --line: rgba(255, 255, 255, 0.18);
+}
+
+/* Light theme */
+.prae-theme-light {
+  --bg: #ffffff;
+  --fg: #0d0d0d;
+  --dim: #555;
+  --line: rgba(0, 0, 0, 0.18);
+}
+```
+
+Theme preference is stored in `localStorage` under the key `wc.theme`.
+
+### Common Functions
+
+All skin `main.js` files implement these utilities:
+
+```javascript
+// Theme management
+function praeNormalizeTheme(value) {
+  return value === 'light' ? 'light' : 'dark';
+}
+
+function praeReadStoredTheme() {
+  // Read from localStorage
+}
+
+function praeSyncThemeOnDom(mode) {
+  // Apply theme classes to <html>, <body>, #works-console
+}
+
+function praeApplyTheme(mode, opts) {
+  // Sync and persist theme
+}
+```
+
+## URL Override (Preview Mode)
+
+Most skins support runtime skin switching via URL parameter:
+
+```
+https://yoursite.com/preview/?skin=vite-breeze
+```
+
+This is controlled by the `ui.allowUrlOverride` config option (enabled by default).
+
+## Customizing Skins
+
+To create a custom skin:
+
+1. Copy an existing skin directory from `ui/skins/`
+2. Modify `template.html`, `style.css`, and `main.js`
+3. Update the `BUILTIN_SKINS` constant in `src/cli/index.js`:
+
+```javascript
+const BUILTIN_SKINS = Object.freeze({
+  'my-skin': { label: 'My Custom Skin', aliases: [] },
+  // ... other skins
+});
+```
+
+4. Regenerate with your new skin:
+
+```bash
+prae generate --skin my-skin --out dist
+```
+
+## Skin Comparison
+
+| Skin | Best For | Layout | Theme | Special Features |
+|------|----------|--------|-------|------------------|
+| **console** | Development, debugging | List | Dark | Monospace, minimal |
+| **vite-breeze** | Modern portfolios | Split pane | Light | Glassmorphism, HUD |
+| **cards-tabs** | Multi-work browsing | Card grid | Dark | Tabbed details, routing |
+| **docs-reader** | Documentation | 3-column | Light | TOC, copy-on-click |
+| **kiosk** | Installations, demos | Fullscreen tiles | Dark | Touch-optimized |
+| **typefolio** | Editorial design | Two-page spread | Light | Book-like, serif type |
+| **typescatter** | Experimental | Scatter/grid | Light | Draggable, type-only |
+
+## Source Code Locations
+
+Skin source files are located at:
+
+```
+~/workspace/source/ui/skins/
+├── cards-tabs/
+├── docs-reader/
+├── kiosk/
+├── typefolio/
+├── typescatter/
+└── vite-breeze/
+```
+
+Each skin is self-contained and can be studied or copied for custom development.

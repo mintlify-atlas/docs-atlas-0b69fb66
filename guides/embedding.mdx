@@ -1,0 +1,237 @@
+---
+title: Embedding in Websites
+description: How to embed Praetorius output in Squarespace, WordPress, and other site builders
+---
+
+Praetorius is designed to drop into any site via a single code block. This guide covers the **code block approach** for embedding generated output.
+
+## The Embed Snippet
+
+The simplest way to embed Praetorius is with the `--embed` flag:
+
+```bash
+prae generate --embed > embed.html
+```
+
+This creates a **self-contained HTML snippet** with:
+- Inline styles (theme tokens + UI CSS)
+- Inline JavaScript (your works data + renderer)
+- HUD component (if applicable)
+
+### Example Output
+
+```html
+<style>
+/* Praetorius — theme tokens (strict light/dark) */
+#works-console.prae-theme-dark, body.prae-theme-dark {
+  --bg: #0f0f0f;
+  --fg: #fff;
+  --dim: #8a8a8a;
+  --line: rgba(255,255,255,.18);
+}
+/* ... full CSS bundle ... */
+</style>
+
+<section id="works-console"></section>
+
+<script>
+(function(){
+  /* HUD renderer + works data */
+  var fallback = { "works": [...], "config": {...} };
+  // Runtime initialization...
+})();
+</script>
+```
+
+<Tip>
+  The embed snippet is **fully self-contained**—no external dependencies. Paste it into any HTML block and it works.
+</Tip>
+
+## Squarespace Integration
+
+<Steps>
+  <Step title="Generate the embed snippet">
+    ```bash
+    prae generate --embed > embed.html
+    ```
+  </Step>
+
+  <Step title="Open Squarespace page editor">
+    Navigate to the page where you want to display your works.
+  </Step>
+
+  <Step title="Add a Code block">
+    - Click **+** to add a block
+    - Search for "Code"
+    - Select **Code** block
+  </Step>
+
+  <Step title="Paste the snippet">
+    Open `embed.html`, copy all content, and paste into the Code block.
+  </Step>
+
+  <Step title="Save and publish">
+    Preview the page to verify, then publish.
+  </Step>
+</Steps>
+
+### Troubleshooting Squarespace
+
+**Works don't appear**
+- Check browser console for errors (F12 → Console)
+- Verify the Code block is set to **Display source code: OFF**
+- Ensure you pasted the **entire** embed snippet
+
+**CSS conflicts**
+- Praetorius uses scoped IDs (`#works-console`) to avoid conflicts
+- If styles still clash, add custom CSS to override:
+  ```css
+  #works-console { /* your overrides */ }
+  ```
+
+**PDF iframe not loading**
+- Squarespace blocks some external iframe sources
+- Host PDFs on your own CDN or use PDF.js viewer URLs
+
+## WordPress Integration
+
+<Steps>
+  <Step title="Generate the embed snippet">
+    ```bash
+    prae generate --embed > embed.html
+    ```
+  </Step>
+
+  <Step title="Edit page in WordPress">
+    Open the page/post editor (Block Editor or Classic).
+  </Step>
+
+  <Step title="Add Custom HTML block">
+    - Click **+** → Search "Custom HTML"
+    - Or switch to **Code Editor** view (three dots menu)
+  </Step>
+
+  <Step title="Paste the snippet">
+    Paste the contents of `embed.html`.
+  </Step>
+
+  <Step title="Preview and publish">
+    Preview to verify, then publish.
+  </Step>
+</Steps>
+
+## Webflow / Wix / Other Builders
+
+Most site builders support **Embed** or **Custom Code** blocks:
+
+1. Generate the embed: `prae generate --embed > embed.html`
+2. Find the "Embed" or "HTML" block in your builder
+3. Paste the snippet
+4. Save and publish
+
+<Warning>
+  Some builders (e.g., Wix) sanitize `<script>` tags. If scripts are stripped, host `script.js` externally and link via `<script src="..."></script>`.
+</Warning>
+
+## Alternative: Hosted Assets
+
+If you prefer to host files separately:
+
+<Steps>
+  <Step title="Generate output">
+    ```bash
+    prae generate --out dist
+    ```
+  </Step>
+
+  <Step title="Upload to CDN">
+    Upload `dist/script.js` and `dist/styles.css` to your hosting/CDN.
+  </Step>
+
+  <Step title="Create HTML block">
+    In your site builder, add a Code/HTML block with:
+    ```html
+    <link rel="stylesheet" href="https://yourcdn.com/styles.css">
+    <section id="works-console"></section>
+    <script src="https://yourcdn.com/script.js"></script>
+    ```
+  </Step>
+</Steps>
+
+### Benefits of Hosted Assets
+
+- Smaller inline code blocks
+- Cache-friendly (browser caches JS/CSS)
+- Easier updates (regenerate → re-upload)
+
+### Downsides
+
+- Requires hosting/CDN setup
+- Two files to manage instead of one snippet
+- CORS issues if hosting domain differs from site domain
+
+## Embed With HUD
+
+The embed snippet includes a minimal **HUD component** for displaying:
+- Current work title
+- Time / duration
+- Play/pause state
+- Playback rate + volume
+
+HUD appears at the top of the page when audio is active:
+
+```html
+<div id="wc-hud" data-component="prae-hud">
+  <div data-part="title">Now playing — String Quartet No. 2</div>
+  <div data-part="subtitle">3:42 / 12:30 · vol:100 · speed:1.00x</div>
+  <div data-part="meter"><span style="width: 30%;"></span></div>
+  <button data-part="toggle" aria-label="Pause">Pause</button>
+</div>
+```
+
+<Tip>
+  The HUD is automatically hidden when no audio is playing. Customize via CSS targeting `#wc-hud`.
+</Tip>
+
+## Theme Control
+
+Force light or dark theme:
+
+```bash
+# Dark (default)
+prae generate --embed --theme dark > embed.html
+
+# Light
+prae generate --embed --theme light > embed.html
+```
+
+Or override in your page CSS:
+```css
+body.prae-theme-light #works-console {
+  --bg: #ffffff;
+  --fg: #0d0d0d;
+}
+```
+
+## Deep Linking
+
+The embed supports URL hash + query params:
+
+```
+# Jump to specific work
+https://yoursite.com/works#work-soundnoisemusic
+
+# Jump to work + start time (630 seconds = 10:30)
+https://yoursite.com/works?t=630#work-soundnoisemusic
+```
+
+The runtime automatically:
+- Scrolls to the work
+- Loads audio
+- Seeks to the specified time
+
+## Next Steps
+
+- [Squarespace-specific guide](/guides/squarespace-integration)
+- [Troubleshooting](/troubleshooting)
+- [Available skins](/concepts/skins)

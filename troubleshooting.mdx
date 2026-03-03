@@ -1,0 +1,146 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when working with Praetorius
+---
+
+## Common Issues
+
+This page covers common issues you might encounter when using Praetorius and how to resolve them.
+
+### 404 Errors for Assets
+
+<Warning>
+  If you see `GET http://localhost:5173/style.css 404` or similar errors, you're pointing at a dev server that isn't running or a path that doesn't exist in production.
+</Warning>
+
+**Solution:**
+
+When embedding Praetorius, you have two options:
+
+1. **Direct embed**: Paste the `--embed` output directly into your site
+2. **Hosted assets**: Host the `dist/*` files on your site and reference those hosted URLs
+
+```bash
+# Generate a single embeddable snippet
+prae generate --embed > embed.html
+
+# Or generate hosted assets
+prae generate --out dist
+```
+
+### PDF Page-Follow Not Working
+
+<Warning>
+  If the PDF viewer isn't automatically following the audio playback, check your PDF hosting and score mapping configuration.
+</Warning>
+
+**Common causes and solutions:**
+
+1. **Incorrect PDF URL format**
+   - Use CDN-hosted links with a proper `file=` parameter
+   - Don't use Google Drive "preview" URLs, as they don't expose page control
+
+2. **Invalid score mapping**
+   - Verify your `score` mapping is monotonic (times must be increasing)
+   - Ensure all page numbers are ≥ 1
+   - Check that `pdfStartPage` correctly corresponds to printed page 1
+
+<Info>
+  Run `prae doctor` to validate your schema, mapping, and links. This command prints actionable guidance for common configuration issues.
+</Info>
+
+**Example valid score mapping:**
+
+```json
+"score": {
+  "pdfStartPage": 11,
+  "mediaOffsetSec": 0,
+  "pageMap": [
+    { "at": "0:30", "page": 1 },
+    { "at": "1:00", "page": 2 },
+    { "at": "2:15", "page": 3 }
+  ],
+  "pdfDelta": 0
+}
+```
+
+### PDF CORS Issues
+
+<Warning>
+  If PDFs aren't loading or you see CORS (Cross-Origin Resource Sharing) errors in the browser console, your PDF hosting may not allow cross-origin access.
+</Warning>
+
+**Solution:**
+
+- **Prefer your own origin** or a CDN you control for PDF hosting
+- Ensure your server sends appropriate CORS headers:
+  ```
+  Access-Control-Allow-Origin: *
+  ```
+- If using a third-party service, verify it supports embedding and cross-origin requests
+
+### Schema Validation Errors
+
+<Info>
+  The `prae doctor` command is your first line of defense for catching schema and configuration issues.
+</Info>
+
+**Common validation issues:**
+
+1. **Missing required fields**: Ensure each work has `id`, `slug`, `title`, and `one` (or `oneliner`)
+2. **Invalid cue format**: Cues should be either `{ label, t }` (seconds) or `@mm:ss` format
+3. **Duplicate IDs or slugs**: Each work must have a unique `id` and `slug`
+
+```bash
+# Validate your works database
+prae doctor
+```
+
+### Embedding in Site Builders
+
+**Squarespace, WordPress, Webflow:**
+
+If your embed isn't displaying correctly:
+
+1. Ensure you're using a Code/HTML block (not a regular text block)
+2. Paste the complete embed output from `prae generate --embed`
+3. Check that your site builder allows custom JavaScript (some plans restrict this)
+4. Verify there are no theme conflicts by testing in an isolated page first
+
+<Info>
+  Praetorius is designed to avoid theme collisions by using strict CSS tokens and isolated scoping.
+</Info>
+
+### Deep Links Not Working
+
+**Issue**: Links to specific works or timestamps aren't activating correctly.
+
+**Format:**
+- Work link: `#work-<slug>`
+- With timestamp: `#work-<slug>?t=630` (for 10:30)
+
+**Check:**
+- Ensure the slug matches exactly (case-sensitive)
+- Verify the time is in seconds (not mm:ss format)
+- Confirm your UI skin supports deep linking
+
+### Audio Not Loading
+
+**Checklist:**
+
+- Verify the audio URL is accessible and returns the correct MIME type
+- Check browser console for CORS or network errors
+- Ensure the audio format is supported by modern browsers (MP3, AAC, OGG)
+- Audio loads lazily by default; check that the work is activated
+
+### Getting Help
+
+If you're still experiencing issues:
+
+1. Run `prae doctor` to validate your configuration
+2. Check the [GitHub Issues](https://github.com/cbassuarez/praetorius/issues) for similar problems
+3. Open a new issue with:
+   - A minimal reproducible example
+   - Your `works.json` sample (or relevant excerpt)
+   - Links to assets (if applicable)
+   - Browser/environment details

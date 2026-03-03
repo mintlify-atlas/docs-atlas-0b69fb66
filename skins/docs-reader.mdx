@@ -1,0 +1,167 @@
+---
+title: Docs Reader Skin
+description: Spacious documentation UI with left navigation, right outline, and copy-on-code
+---
+
+# Docs Reader Skin
+
+The **Docs Reader** skin provides a spacious documentation-style interface optimized for reading program notes and technical documentation.
+
+## Overview
+
+Docs Reader offers a comprehensive documentation experience with:
+- Three-column layout: left navigation, center content, right outline
+- Code block syntax highlighting with copy buttons
+- Table of contents auto-generation
+- Search functionality
+- Breadcrumb navigation
+- Mobile-responsive collapsible sidebars
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Program Notes" icon="file-lines">
+    Present detailed program notes and analysis
+  </Card>
+  
+  <Card title="Documentation" icon="book">
+    Technical documentation for works or processes
+  </Card>
+  
+  <Card title="Research Projects" icon="microscope">
+    Academic or research-focused presentations
+  </Card>
+  
+  <Card title="Long-Form Content" icon="scroll">
+    Extended writings with multiple sections and headings
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Layout**: Three-column docs layout (nav, content, outline)
+- **Typography**: Optimized for reading with generous line height
+- **Navigation**: Hierarchical sidebar with expandable sections
+- **Code Blocks**: Syntax-highlighted with copy buttons
+- **Outline**: Auto-generated right sidebar table of contents
+
+## Generation Example
+
+```bash
+# Generate with Docs Reader skin
+praetorius generate --skin docs-reader
+
+# Using alias
+praetorius generate --skin docs
+```
+
+## Configuration
+
+Set Docs Reader as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "docs-reader",
+    "allowUrlOverride": true
+  },
+  "site": {
+    "title": "Program Notes",
+    "subtitle": "Concert Season 2024"
+  }
+}
+```
+
+## Key Features
+
+### Three-Column Layout
+Left navigation for work list, center for content, right outline for in-page navigation.
+
+### Auto-Generated TOC
+Table of contents automatically built from heading hierarchy (h2, h3, h4).
+
+### Code Block Enhancements
+Syntax highlighting and copy-to-clipboard buttons for all code blocks.
+
+### Search
+Built-in search across all works and content.
+
+### Breadcrumbs
+Breadcrumb trail shows current location in content hierarchy.
+
+### Responsive Sidebars
+Sidebars collapse on mobile with toggle buttons for space efficiency.
+
+## HTML Structure
+
+```html
+<div class="dr-container">
+  <aside class="dr-sidebar-left">
+    <nav class="dr-nav">
+      <ul class="dr-nav-list">
+        <li><a href="#work-1">Work 1</a></li>
+        <li><a href="#work-2">Work 2</a></li>
+      </ul>
+    </nav>
+  </aside>
+  
+  <main class="dr-content">
+    <article class="dr-article">
+      <!-- Work content -->
+    </article>
+  </main>
+  
+  <aside class="dr-sidebar-right">
+    <nav class="dr-outline">
+      <h4>On this page</h4>
+      <ul class="dr-outline-list">
+        <!-- Auto-generated TOC -->
+      </ul>
+    </nav>
+  </aside>
+</div>
+```
+
+## CSS Classes
+
+- `.dr-container` - Main three-column container
+- `.dr-sidebar-left` - Left navigation panel
+- `.dr-content` - Center content area
+- `.dr-sidebar-right` - Right outline panel
+- `.dr-nav` - Navigation component
+- `.dr-outline` - Table of contents
+- `.dr-breadcrumb` - Breadcrumb trail
+
+## Special Features
+
+### Copy-on-Code
+All code blocks include a copy button that appears on hover.
+
+### Keyboard Navigation
+Supports keyboard shortcuts for navigation and search.
+
+### Anchor Links
+All headings get anchor links for direct section linking.
+
+## Aliases
+
+The `docs` alias provides a shorter command:
+
+```bash
+praetorius generate --skin docs
+```
+
+## Source Location
+
+Implementation: `source/ui/skins/docs-reader/`
+- `template.html` - Three-column layout structure
+- `style.css` - Documentation-optimized styles
+- `main.js` - TOC generation, search, and navigation
+
+<Warning>
+Docs Reader is designed for **documentation content**, not audio/PDF-heavy portfolios. For works catalogs, use Vite Breeze or Cards & Tabs instead.
+</Warning>
+
+<Note>
+The Docs Reader skin automatically disables works-specific features like audio players when focused on documentation mode.
+</Note>

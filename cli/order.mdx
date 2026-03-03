@@ -1,0 +1,224 @@
+---
+title: prae order
+description: Reorder works in the database for display sequence
+---
+
+# prae order
+
+Reorder works in `.prae/works.json`. Array order determines display sequence in generated UIs.
+
+## Syntax
+
+```bash
+prae order [options]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--move <id>` | Move a single work by ID |
+| `--to <index>` | Target position (1-based, use with --move) |
+
+## Modes
+
+### Interactive Mode (default)
+
+Prompts for new order as space/comma-separated IDs.
+
+```bash
+prae order
+```
+
+### Direct Move Mode
+
+Move single work to specific position.
+
+```bash
+prae order --move 3 --to 1
+```
+
+## Behavior
+
+<Note>
+**Work IDs are identities** - Reordering changes array position but NOT work IDs. IDs remain stable across reorders.
+</Note>
+
+Array order in `.prae/works.json` determines:
+- Display sequence in UI
+- Tab order in skins like vite-breeze
+- List order in navigation menus
+
+## Examples
+
+### Interactive reorder
+
+```bash
+prae order
+```
+
+```
+Current order:
+ 1. #1 String Quartet No. 2
+ 2. #2 Piano Sonata
+ 3. #3 Symphony No. 1
+ 4. #4 Chamber Music
+? Enter new order as space/comma-separated IDs: 3 1 4 2
+reordered 3 1 4 2
+```
+
+New order:
+```
+ 1. #3 Symphony No. 1
+ 2. #1 String Quartet No. 2
+ 3. #4 Chamber Music
+ 4. #2 Piano Sonata
+```
+
+### Move work to top
+
+```bash
+prae order --move 3 --to 1
+```
+
+```
+moved #3 → position 1
+```
+
+### Move work to end
+
+```bash
+prae order --move 1 --to 4
+```
+
+Assuming 4 works total, moves work #1 to last position.
+
+### Swap two works
+
+```bash
+# Move #2 to position 1, then #1 to position 2
+prae order --move 2 --to 1
+prae order --move 1 --to 2
+```
+
+Or interactively:
+
+```bash
+prae order
+# Current: 1 2 3 4
+# Enter: 2 1 3 4
+```
+
+## Validation
+
+Interactive mode requires:
+
+- **Same set of IDs** - Must include all existing work IDs exactly once
+- **No duplicates** - Each ID appears once
+- **No missing IDs** - All existing IDs must be present
+
+Direct mode validates:
+
+- **ID exists** - Work with `--move` ID must exist
+- **Valid index** - `--to` must be 1 to N (where N = total works)
+
+## Error Examples
+
+### Missing required option
+
+```bash
+prae order --move 3
+```
+
+```
+Provide --to <index> with --move.
+```
+
+### Invalid ID
+
+```bash
+prae order --move 99 --to 1
+```
+
+```
+No work with id 99
+```
+
+### Index out of range
+
+```bash
+prae order --move 1 --to 10
+```
+
+```
+Index out of range.
+```
+
+### Missing IDs in interactive mode
+
+```bash
+prae order
+# Current: 1 2 3 4
+? Enter new order: 1 2 3
+```
+
+```
+New order must contain exactly the same IDs.
+```
+
+## Verification
+
+After reordering:
+
+```bash
+prae list
+```
+
+```
+Works
+#3 Symphony No. 1  (symphony-1)
+   Four-movement orchestral work   [order=1]
+#1 String Quartet No. 2  (string-quartet-2)
+   A through-composed quartet   [order=2]
+#4 Chamber Music  (chamber-music)
+   Mixed ensemble piece   [order=3]
+#2 Piano Sonata  (piano-sonata)
+   Modern sonata form   [order=4]
+```
+
+Note how `[order=N]` reflects new array position, but IDs remain unchanged.
+
+## Data Structure
+
+**Before reorder (1 2 3 4):**
+```json
+{
+  "version": 1,
+  "works": [
+    { "id": 1, "title": "String Quartet", ... },
+    { "id": 2, "title": "Piano Sonata", ... },
+    { "id": 3, "title": "Symphony", ... },
+    { "id": 4, "title": "Chamber Music", ... }
+  ]
+}
+```
+
+**After reorder (3 1 4 2):**
+```json
+{
+  "version": 1,
+  "works": [
+    { "id": 3, "title": "Symphony", ... },
+    { "id": 1, "title": "String Quartet", ... },
+    { "id": 4, "title": "Chamber Music", ... },
+    { "id": 2, "title": "Piano Sonata", ... }
+  ]
+}
+```
+
+## See Also
+
+- [prae list](/cli/list) - View current order
+- [prae add](/cli/add) - Add works (appended to end)
+- [prae rm](/cli/remove) - Remove works (preserves order)
+- [prae generate](/cli/generate) - Output respects work order

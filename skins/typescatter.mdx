@@ -1,0 +1,220 @@
+---
+title: TypeScatter Skin
+description: Type-only poster wall with scatter-to-grid animation and draggable tiles
+---
+
+# TypeScatter Skin
+
+The **TypeScatter** skin creates a type-only poster wall where work titles scatter across the screen and can be arranged into a grid layout.
+
+## Overview
+
+TypeScatter provides a unique, experimental interface with:
+- Typography-only design (no images)
+- Scattered poster layout that animates to grid
+- Draggable work tiles
+- Variable font sizes and rotations
+- Minimalist, text-focused aesthetic
+- Smooth scatter-to-grid transitions
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Experimental Design" icon="flask">
+    Avant-garde presentations and experimental portfolios
+  </Card>
+  
+  <Card title="Typography Focus" icon="font">
+    When you want to emphasize work titles and text
+  </Card>
+  
+  <Card title="Interactive Exploration" icon="hands">
+    Encourage visitors to explore and rearrange content
+  </Card>
+  
+  <Card title="Minimalist Aesthetic" icon="minimize">
+    Stripped-down, type-only visual approach
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Typography**: Mixed sizes, weights, and rotations
+- **Layout**: Random scatter → organized grid
+- **Colors**: Monochrome or minimal color palette
+- **Animation**: Smooth physics-based transitions
+- **Interaction**: Draggable, re-arrangeable tiles
+
+## Generation Example
+
+```bash
+# Generate with TypeScatter skin
+praetorius generate --skin typescatter
+
+# Using alias
+praetorius generate --skin posterboard
+```
+
+## Configuration
+
+Set TypeScatter as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "typescatter",
+    "allowUrlOverride": true
+  },
+  "typescatter": {
+    "initialMode": "scatter",
+    "enableDrag": true,
+    "randomRotation": true,
+    "fontSizeVariation": true
+  }
+}
+```
+
+## Key Features
+
+### Scatter Mode
+Work titles are randomly positioned across the viewport with varied sizes and rotations.
+
+### Grid Mode
+One-click transition to organized grid layout with uniform sizing.
+
+### Drag & Drop
+Users can drag individual tiles to custom positions (position persists in scatter mode).
+
+### Typography Variation
+Randomized font sizes (within bounds) and rotation angles for visual interest.
+
+### Toggle Animation
+Smooth spring-physics animation between scatter and grid modes.
+
+### Click to Detail
+Click any tile to view full work details.
+
+## HTML Structure
+
+```html
+<div class="ts-container" data-mode="scatter">
+  <header class="ts-header">
+    <h1 class="ts-site-title">Portfolio</h1>
+    <button id="ts-mode-toggle" class="ts-toggle" aria-pressed="false">
+      <span class="ts-toggle-label">Grid</span>
+    </button>
+  </header>
+  
+  <main class="ts-stage">
+    <div class="ts-tile" 
+         data-work-id="1" 
+         style="--x: 20%; --y: 30%; --rot: -5deg; --scale: 1.2;">
+      <h2 class="ts-tile-title">Work Title</h2>
+    </div>
+    <!-- More tiles scattered... -->
+  </main>
+</div>
+```
+
+## CSS Classes
+
+- `.ts-container` - Main container
+- `.ts-stage` - Scatter/grid stage
+- `.ts-tile` - Individual work tile
+- `.ts-tile-title` - Work title text
+- `.ts-toggle` - Scatter/grid mode toggle
+- `.ts-container[data-mode="grid"]` - Grid mode state
+- `.ts-container[data-mode="scatter"]` - Scatter mode state
+
+## CSS Custom Properties
+
+Each tile uses CSS custom properties for animation:
+
+```css
+.ts-tile {
+  --x: 20%;           /* horizontal position */
+  --y: 30%;           /* vertical position */
+  --rot: -5deg;       /* rotation angle */
+  --scale: 1.2;       /* size multiplier */
+}
+```
+
+## Interaction Modes
+
+### Scatter Mode (Default)
+- Tiles randomly positioned
+- Variable sizes and rotations
+- Draggable to custom positions
+- Organic, poster-wall aesthetic
+
+### Grid Mode
+- Organized rows and columns
+- Uniform sizing and no rotation
+- Maintains reading order
+- Easier scanning and selection
+
+## TypeScatter Options
+
+### Initial Mode
+```json
+"typescatter": {
+  "initialMode": "scatter"  // or "grid"
+}
+```
+
+### Enable Dragging
+```json
+"typescatter": {
+  "enableDrag": true
+}
+```
+
+### Random Rotation
+```json
+"typescatter": {
+  "randomRotation": true,
+  "maxRotation": 15  // degrees
+}
+```
+
+### Font Size Variation
+```json
+"typescatter": {
+  "fontSizeVariation": true,
+  "minFontSize": 1.0,  // rem
+  "maxFontSize": 3.0   // rem
+}
+```
+
+## Accessibility Considerations
+
+<Warning>
+Scatter mode can be disorienting for some users. Always provide:
+- Clear toggle to grid mode
+- Keyboard navigation support
+- Screen reader-friendly DOM order
+- Option to disable animations
+</Warning>
+
+## Aliases
+
+The `posterboard` alias provides an alternative name:
+
+```bash
+praetorius generate --skin posterboard
+```
+
+## Source Location
+
+Implementation: `source/ui/skins/typescatter/`
+- `template.html` - Stage and tile structure
+- `style.css` - Typography and animation styles
+- `main.js` - Scatter logic, drag handlers, mode toggle
+
+<Tip>
+TypeScatter works best with 8-20 works. Too few looks sparse, too many creates clutter.
+</Tip>
+
+<Note>
+The physics-based animation uses CSS transitions and transforms for smooth 60fps performance.
+</Note>

@@ -1,0 +1,202 @@
+---
+title: Kiosk Skin
+description: Touch-first tile interface for demos, galleries, and presentation displays
+---
+
+# Kiosk Skin
+
+The **Kiosk** skin provides a touch-optimized tile interface designed for public displays, demos, galleries, and presentation environments.
+
+## Overview
+
+Kiosk delivers a large-format, touch-friendly experience with:
+- Oversized tile grid for easy touch targeting
+- Full-screen presentation mode
+- Large, high-contrast controls
+- Auto-play and looping options
+- Minimal chrome and distractions
+- Idle timeout with attract screen
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Gallery Installations" icon="palette">
+    Public art galleries and museum exhibits
+  </Card>
+  
+  <Card title="Conference Demos" icon="presentation">
+    Trade shows and conference booths
+  </Card>
+  
+  <Card title="Touch Displays" icon="hand-pointer">
+    Large touchscreen kiosks and interactive displays
+  </Card>
+  
+  <Card title="Presentations" icon="desktop">
+    Lecture demonstrations and workshops
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Layout**: Large tile grid (2x2 or 3x3)
+- **Typography**: Extra-large, high-contrast text
+- **Controls**: Oversized buttons (minimum 44x44px)
+- **Colors**: High contrast for visibility from distance
+- **Spacing**: Generous padding for touch accuracy
+
+## Generation Example
+
+```bash
+# Generate with Kiosk skin
+praetorius generate --skin kiosk
+
+# Using alias
+praetorius generate --skin presentation
+```
+
+## Configuration
+
+Set Kiosk as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "kiosk",
+    "allowUrlOverride": true
+  },
+  "kiosk": {
+    "idleTimeout": 60000,
+    "autoPlay": false,
+    "loopPlaylist": true,
+    "tileSize": "large"
+  }
+}
+```
+
+## Key Features
+
+### Large Touch Targets
+All interactive elements are oversized (minimum 44x44px) for accurate touch input.
+
+### Tile Grid Layout
+Works displayed as large tiles with prominent titles and thumbnails.
+
+### Full-Screen Mode
+One-tap full-screen presentation with minimal UI.
+
+### Auto-Play Mode
+Optional automatic cycling through works with configurable intervals.
+
+### Idle Reset
+Returns to home screen after period of inactivity (configurable timeout).
+
+### High Contrast
+Enhanced contrast ratios for visibility in varied lighting conditions.
+
+## HTML Structure
+
+```html
+<div class="kiosk-container" data-mode="gallery">
+  <header class="kiosk-header">
+    <h1 class="kiosk-title">Works Gallery</h1>
+    <button class="kiosk-fullscreen" aria-label="Full screen">⛶</button>
+  </header>
+  
+  <main class="kiosk-grid">
+    <article class="kiosk-tile" data-work-id="1">
+      <div class="kiosk-tile-image">
+        <img src="thumbnail.jpg" alt="Work 1">
+      </div>
+      <h2 class="kiosk-tile-title">Work Title</h2>
+      <p class="kiosk-tile-subtitle">Composer Name</p>
+    </article>
+    <!-- More tiles... -->
+  </main>
+  
+  <footer class="kiosk-footer">
+    <button class="kiosk-nav-btn kiosk-nav-prev">‹</button>
+    <button class="kiosk-nav-btn kiosk-nav-next">›</button>
+  </footer>
+</div>
+```
+
+## CSS Classes
+
+- `.kiosk-container` - Main container
+- `.kiosk-grid` - Tile grid layout
+- `.kiosk-tile` - Individual work tile
+- `.kiosk-tile-image` - Tile thumbnail area
+- `.kiosk-fullscreen` - Full-screen toggle button
+- `.kiosk-nav-btn` - Navigation buttons
+
+## Touch Interactions
+
+### Tap
+Single tap on tile opens work detail view.
+
+### Swipe
+Horizontal swipe navigates between works (optional).
+
+### Long Press
+Long press on tile shows quick actions menu.
+
+### Pinch
+Pinch gesture for zoom (if enabled).
+
+## Accessibility
+
+- **ARIA Labels**: All controls have descriptive ARIA labels
+- **High Contrast**: WCAG AA contrast ratios minimum
+- **Focus Indicators**: Large, visible focus outlines
+- **Screen Reader**: Full screen reader support
+
+## Kiosk Options
+
+### Idle Timeout
+```json
+"kiosk": {
+  "idleTimeout": 60000  // milliseconds
+}
+```
+
+### Auto-Play
+```json
+"kiosk": {
+  "autoPlay": true,
+  "playInterval": 30000  // 30 seconds per work
+}
+```
+
+### Loop Mode
+```json
+"kiosk": {
+  "loopPlaylist": true
+}
+```
+
+## Aliases
+
+The `presentation` alias provides an alternative name:
+
+```bash
+praetorius generate --skin presentation
+```
+
+## Source Location
+
+Implementation: `source/ui/skins/kiosk/`
+- `template.html` - Tile grid structure
+- `style.css` - Large-format styles
+- `main.js` - Touch handlers, auto-play, idle detection
+
+<Tip>
+For gallery installations, disable right-click and browser chrome:
+```js
+document.addEventListener('contextmenu', e => e.preventDefault());
+```
+</Tip>
+
+<Warning>
+Test touch interactions on actual hardware—mouse behavior differs from touch.
+</Warning>

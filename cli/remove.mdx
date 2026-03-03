@@ -1,0 +1,151 @@
+---
+title: prae rm
+description: Remove a work from the database with confirmation
+---
+
+# prae rm
+
+Remove a work by ID from `.prae/works.json`. Requires confirmation before deletion.
+
+## Syntax
+
+```bash
+prae rm <id>
+```
+
+## Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<id>` | Numeric work ID to remove |
+
+## Behavior
+
+1. Looks up work by ID
+2. Displays work details
+3. Prompts for confirmation
+4. Creates automatic backup (`.prae/works.json.bak`)
+5. Removes work from array
+6. Saves updated database
+
+<Note>
+**Work IDs are identities** - Removing a work does NOT renumber remaining works. The deleted ID becomes permanently unavailable.
+</Note>
+
+## Examples
+
+### Remove a work
+
+```bash
+prae rm 3
+```
+
+Interactive confirmation:
+
+```
+? Delete #3 Piano Sonata? No
+aborted
+```
+
+### Confirm removal
+
+```bash
+prae rm 5
+```
+
+```
+? Delete #5 String Quartet No. 1? Yes
+removed #5 String Quartet No. 1
+```
+
+## Error Handling
+
+### Work not found
+
+```bash
+prae rm 99
+```
+
+```
+No work with id 99
+```
+
+Exits with code 1.
+
+## Verification
+
+After removal, verify with:
+
+```bash
+prae list
+```
+
+```
+Works
+#1 String Quartet No. 2  (string-quartet-2)
+   A through-composed quartet   [order=1]
+#2 Piano Sonata  (piano-sonata)
+   Modern sonata form   [order=2]
+```
+
+## Recovery
+
+If removed accidentally:
+
+### Option 1: Restore from backup
+
+```bash
+cp .prae/works.json.bak .prae/works.json
+```
+
+### Option 2: Use undo command
+
+```bash
+prae undo
+```
+
+Reverts to last snapshot (if available).
+
+## Data Impact
+
+Removing work ID 3 from database:
+
+**Before:**
+```json
+{
+  "version": 1,
+  "works": [
+    { "id": 1, "title": "Work 1", ... },
+    { "id": 2, "title": "Work 2", ... },
+    { "id": 3, "title": "Work 3", ... },
+    { "id": 4, "title": "Work 4", ... }
+  ]
+}
+```
+
+**After:**
+```json
+{
+  "version": 1,
+  "works": [
+    { "id": 1, "title": "Work 1", ... },
+    { "id": 2, "title": "Work 2", ... },
+    { "id": 4, "title": "Work 4", ... }
+  ]
+}
+```
+
+Note: ID 3 is gone permanently. Next added work will receive ID 5.
+
+## Display Order
+
+Removing a work does NOT affect display order of remaining works. Array order in `.prae/works.json` determines rendering order.
+
+Use `prae order` to rearrange after removal.
+
+## See Also
+
+- [prae list](/cli/list) - View all works
+- [prae order](/cli/order) - Reorder works
+- [prae add](/cli/add) - Add new works
+- [Works JSON](/configuration/works-json) - Manual database editing

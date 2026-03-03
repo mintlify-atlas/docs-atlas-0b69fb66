@@ -1,0 +1,162 @@
+---
+title: Works Data Structure
+description: Understanding the .prae/works.json schema and data model
+---
+
+The `.prae/works.json` file is the heart of your Praetorius project. It stores all metadata about your compositions, recordings, and scores in a human-readable JSON format.
+
+## Schema Overview
+
+Praetorius validates your works data against a strict JSON schema defined in the CLI. The schema ensures data integrity and enables reliable code generation.
+
+### Required Fields
+
+Every work must include these core fields:
+
+```json
+{
+  "id": 1,
+  "slug": "soundnoisemusic",
+  "title": "String Quartet No. 2 — SOUNDNOISEMUSIC",
+  "oneliner": "A through-composed/indeterminate quartet..."
+}
+```
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `integer` | ≥ 1, unique | Numeric identifier for the work |
+| `slug` | `string` | min 1 char | URL-safe identifier (auto-generated from title if omitted) |
+| `title` | `string` | min 1 char | Full title of the work |
+| `oneliner` or `one` | `string` | 1-240 chars, no newlines | Brief description for listings |
+
+<Note>
+  You must provide either `oneliner` or `one`. The CLI normalizes these fields during processing.
+</Note>
+
+### Optional Fields
+
+Enhance your work entries with these optional fields:
+
+#### Media & Files
+
+```json
+{
+  "audio": "https://example.com/audio.mp3",
+  "pdf": "https://example.com/score.pdf"
+}
+```
+
+- **`audio`** (`string | null`) — URL to the audio recording
+- **`pdf`** (`string | null`) — URL to the score PDF
+
+#### Extended Narrative
+
+```json
+{
+  "description": "Full-length program notes...",
+  "desc": "Alternate description field"
+}
+```
+
+- **`description`** (`string | array | null`) — Long-form description or program notes
+- **`desc`** (`string | array | null`) — Alternate field (normalized to `description`)
+
+<Note>
+  `description` can be a single string or an array of strings (treated as paragraphs).
+</Note>
+
+#### Cues
+
+Define time-based navigation points:
+
+```json
+{
+  "cues": [
+    { "label": "Introduction", "t": 0 },
+    { "label": "Development", "t": 180 },
+    { "label": "@10:30", "t": 630 }
+  ]
+}
+```
+
+- **`cues`** — Array of cue objects
+  - **`label`** (`string`) — Display label for the cue
+  - **`t`** (`integer`, ≥ 0) — Time in seconds
+
+<Warning>
+  Cue times (`t`) must be non-negative integers. Use the `@mm:ss` format in labels for readability.
+</Warning>
+
+#### Score Page-Follow Configuration
+
+Enable synchronized PDF page navigation. See [Page-Follow Synchronization](/concepts/page-follow) for details.
+
+```json
+{
+  "score": {
+    "pdfStartPage": 11,
+    "mediaOffsetSec": 0,
+    "pdfDelta": 0,
+    "pageMap": [
+      { "at": "0:30", "page": 1 },
+      { "at": "1:00", "page": 2 }
+    ]
+  }
+}
+```
+
+## Complete Example
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "soundnoisemusic",
+      "title": "String Quartet No. 2 — SOUNDNOISEMUSIC",
+      "oneliner": "A through-composed/indeterminate quartet exploring the boundaries between sound, noise, and music.",
+      "description": "This work investigates the perceptual threshold between organized sound and noise through extended string techniques.",
+      "audio": "https://cdn.example.com/audio/sq2.mp3",
+      "pdf": "https://cdn.example.com/scores/sq2.pdf",
+      "cues": [
+        { "label": "Movement I", "t": 0 },
+        { "label": "Movement II", "t": 420 },
+        { "label": "@10:30", "t": 630 }
+      ],
+      "score": {
+        "pdfStartPage": 11,
+        "mediaOffsetSec": 0,
+        "pageMap": [
+          { "at": 0, "page": 1 },
+          { "at": 30, "page": 2 },
+          { "at": 60, "page": 3 }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Schema Validation
+
+The CLI uses [Ajv](https://ajv.js.org/) to validate your data against the `WORKS_SCHEMA` constant. Validation errors show:
+
+- Missing required fields
+- Type mismatches
+- Constraint violations (e.g., negative IDs, overly long oneliners)
+
+Run `prae doctor` to validate your data and get actionable diagnostics.
+
+## Version & Migration
+
+The schema version is tracked in the root `version` field:
+
+```json
+{
+  "version": 1,
+  "works": [...]
+}
+```
+
+The CLI automatically migrates older schemas when loading data. Current schema version is defined by `LATEST_SCHEMA_VERSION` in the source.

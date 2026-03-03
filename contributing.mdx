@@ -1,0 +1,217 @@
+---
+title: Contributing
+description: How to contribute to Praetorius development
+---
+
+## Contributing to Praetorius
+
+Praetorius is an open-source project, and contributions are welcome! Whether you're reporting bugs, suggesting features, improving documentation, or submitting code, your help makes the project better for everyone.
+
+## Getting Started
+
+### Repository
+
+The Praetorius project is hosted on GitHub:
+
+**[github.com/cbassuarez/praetorius](https://github.com/cbassuarez/praetorius)**
+
+### License
+
+Praetorius is licensed under the **MIT License**. This means:
+
+- ✓ You can use it commercially
+- ✓ You can modify it
+- ✓ You can distribute it
+- ✓ You can use it privately
+
+The only requirement is that you include the original copyright notice and license in any copies or substantial portions of the software.
+
+<Info>
+  By contributing to Praetorius, you agree that your contributions will be licensed under the same MIT License.
+</Info>
+
+## Ways to Contribute
+
+### Report Bugs
+
+If you encounter a bug, please [open an issue](https://github.com/cbassuarez/praetorius/issues) with:
+
+1. **A clear title** describing the problem
+2. **Steps to reproduce** the issue
+3. **Expected behavior** vs. actual behavior
+4. **Your environment**:
+   - Praetorius version (`prae --version`)
+   - Node.js version
+   - Operating system
+5. **A minimal reproducible example**:
+   - Relevant excerpt from your `works.json`
+   - Links to assets (if applicable)
+   - Error messages or console output
+
+<Warning>
+  Before opening a new issue, please search existing issues to avoid duplicates.
+</Warning>
+
+### Suggest Features
+
+Have an idea for a new feature or enhancement? [Open an issue](https://github.com/cbassuarez/praetorius/issues) with:
+
+- **Clear description** of the feature
+- **Use case**: Why would this be valuable?
+- **Examples**: How would it work in practice?
+- **Alternatives**: Have you considered other approaches?
+
+### Improve Documentation
+
+Documentation improvements are always appreciated! You can:
+
+- Fix typos or unclear explanations
+- Add examples or tutorials
+- Improve code comments
+- Expand the troubleshooting guide
+
+For documentation changes, open a pull request with your proposed edits.
+
+### Submit Code
+
+Ready to contribute code? Here's the workflow:
+
+#### 1. Fork and Clone
+
+```bash
+# Fork the repository on GitHub, then clone your fork
+git clone https://github.com/YOUR-USERNAME/praetorius.git
+cd praetorius
+```
+
+#### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+#### 3. Create a Branch
+
+```bash
+git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/your-bug-fix
+```
+
+#### 4. Make Your Changes
+
+- Write clear, readable code
+- Follow existing code style and conventions
+- Add comments where necessary
+- Update documentation if needed
+
+#### 5. Test Your Changes
+
+```bash
+# Run tests (if available)
+npm test
+
+# Test the CLI locally
+npm link
+prae --help
+```
+
+<Info>
+  Unit tests for time parsing and score validation are especially helpful. If you're adding new functionality, please include tests.
+</Info>
+
+#### 6. Commit and Push
+
+```bash
+git add .
+git commit -m "Brief description of your changes"
+git push origin feature/your-feature-name
+```
+
+#### 7. Open a Pull Request
+
+Go to the [Praetorius repository](https://github.com/cbassuarez/praetorius) and open a pull request from your branch.
+
+In your PR description, include:
+
+- **What** you changed
+- **Why** you made the change
+- **How** to test it
+- **Related issues** (if any)
+
+## Code Guidelines
+
+### General Principles
+
+- **Minimal dependencies**: Praetorius aims to be small and disciplined
+- **Host-agnostic**: Solutions should work across different hosting environments
+- **User-owned assets**: Don't introduce features that require hosting user media
+- **Clear abstractions**: Code should be readable and maintainable
+
+### Areas of Interest
+
+Contributions are particularly valuable in these areas:
+
+1. **Time parsing and validation**
+   - Robust handling of various time formats
+   - Clear error messages for invalid input
+
+2. **Score validation**
+   - Monotonic mapping checks
+   - PDF page number validation
+   - Helpful diagnostic output
+
+3. **New skins**
+   - Creative UI presentations of works data
+   - Accessible, responsive designs
+   - Clear documentation of skin features
+
+4. **CLI improvements**
+   - Better prompts and wizards
+   - Enhanced `doctor` diagnostics
+   - Export/import format support
+
+5. **Documentation**
+   - Tutorials and examples
+   - Integration guides for various platforms
+   - Troubleshooting tips
+
+## Code of Conduct
+
+### Be Respectful
+
+- Use welcoming and inclusive language
+- Respect differing viewpoints and experiences
+- Accept constructive criticism gracefully
+- Focus on what's best for the community
+
+### Collaborate
+
+- Assume good faith in discussions
+- Ask questions when you don't understand
+- Help others when you can
+- Give credit where it's due
+
+## Questions?
+
+If you have questions about contributing:
+
+- Check existing [issues](https://github.com/cbassuarez/praetorius/issues) and discussions
+- Open a new issue with the "question" label
+- Review the [README](https://github.com/cbassuarez/praetorius#readme) and documentation
+
+## Recognition
+
+Contributors are recognized in:
+
+- Commit history and pull request acknowledgments
+- Release notes for significant contributions
+- The project's contributor list (if maintained)
+
+Thank you for contributing to Praetorius and helping make score-based portfolio publishing better for everyone!
+
+---
+
+**Praetorius** is built and maintained by [Seb Suarez](https://github.com/cbassuarez) and contributors.
+
+© 2025 cbassuarez | MIT License

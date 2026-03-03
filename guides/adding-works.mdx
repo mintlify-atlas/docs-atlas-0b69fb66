@@ -1,0 +1,134 @@
+---
+title: Adding Works
+description: Use the interactive wizard to add works to your Praetorius database
+---
+
+The `prae add` command launches an interactive wizard that guides you through adding new works to your portfolio. All data is stored in `.prae/works.json`.
+
+## Quick Start
+
+<Steps>
+  <Step title="Run the add command">
+    ```bash
+    prae add
+    ```
+  </Step>
+
+  <Step title="Answer the prompts">
+    The wizard will ask you for:
+    - **Title**: Full work title (required)
+    - **Slug**: URL-friendly identifier (auto-generated if empty)
+    - **One-liner**: Brief description (required, max 240 chars, single line)
+    - **Audio URL**: Link to audio file (optional)
+    - **PDF URL**: Link to score PDF (optional)
+    - **Cues**: Timestamp markers (optional)
+  </Step>
+
+  <Step title="Review and save">
+    Your work is automatically added to `.prae/works.json` with a unique ID.
+    ```bash
+    # Example output
+    ✓ Added work #3: "String Quartet No. 2"
+    ```
+  </Step>
+</Steps>
+
+## Interactive Prompts
+
+### Required Fields
+
+**Title**
+```
+? Title: String Quartet No. 2 — SOUNDNOISEMUSIC
+```
+The full title of your work as it should appear in your portfolio.
+
+**Slug**
+```
+? Slug (leave empty to auto-generate): soundnoisemusic
+```
+URL-friendly identifier. If left empty, auto-generated from title (e.g., "String Quartet No. 2" → `string-quartet-no-2`).
+
+**One-liner**
+```
+? One-liner (max 240 chars, single line): A through-composed/indeterminate quartet exploring texture and rhythm
+```
+Brief description displayed in work lists. Must be:
+- Single line (no newlines)
+- Max 240 characters
+- Required for all works
+
+### Optional Fields
+
+**Audio URL**
+```
+? Audio URL (or leave empty): https://cdn.example.com/audio/quartet-no-2.mp3
+```
+Direct link to your audio file. Supports:
+- MP3, OGG, WAV, M4A
+- CDN links (recommended)
+- Self-hosted files
+
+**PDF URL**
+```
+? PDF URL (or leave empty): https://cdn.example.com/scores/quartet-no-2.pdf
+```
+Direct link to your score PDF. For best page-follow support, use:
+- Direct PDF URLs (not Google Drive preview links)
+- CDN-hosted files for reliability
+
+**Cues**
+```
+? Add cues? (y/n): y
+? Cue label: @10:30
+? Cue time (mm:ss or seconds): 10:30
+? Add another cue? (y/n): n
+```
+Timestamp markers for quick navigation. Format:
+- Time: `mm:ss` (e.g., `10:30`) or seconds (e.g., `630`)
+- Label: Any text, commonly `@mm:ss` format
+
+## Data Structure
+
+After adding a work, your `.prae/works.json` will contain:
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "soundnoisemusic",
+      "title": "String Quartet No. 2 — SOUNDNOISEMUSIC",
+      "oneliner": "A through-composed/indeterminate quartet exploring texture and rhythm",
+      "audio": "https://cdn.example.com/audio/quartet-no-2.mp3",
+      "pdf": "https://cdn.example.com/scores/quartet-no-2.pdf",
+      "cues": [
+        { "label": "@10:30", "t": 630 }
+      ]
+    }
+  ]
+}
+```
+
+<Tip>
+  IDs are auto-assigned and guaranteed unique. If you import works later, the CLI handles ID conflicts automatically.
+</Tip>
+
+## Next Steps
+
+After adding works:
+
+1. **Preview your data**: Run `prae list` to see all works
+2. **Generate output**: Run `prae generate` to create deployable assets
+3. **Add page-follow**: Configure score mapping in the interactive wizard or edit `.prae/works.json` directly
+
+<Warning>
+  Keep `.prae/works.json` under version control. This is your canonical data source. History snapshots are auto-saved to `.prae/history/`.
+</Warning>
+
+## Related Commands
+
+- [`prae edit`](/cli/edit) - Modify existing works
+- [`prae list`](/cli/list) - View all works
+- [`prae import`](/cli/import) - Import from JSON/CSV/YAML

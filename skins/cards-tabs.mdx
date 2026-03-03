@@ -1,0 +1,149 @@
+---
+title: Cards & Tabs Skin
+description: Portfolio dashboard with card grid layout and tabbed navigation
+---
+
+# Cards & Tabs Skin
+
+The **Cards & Tabs** skin presents your works as a dashboard with a card grid layout and tab-based navigation.
+
+## Overview
+
+Cards & Tabs provides a modern dashboard interface with:
+- Card grid layout for works overview
+- Tabbed navigation for organizing content
+- Hover effects and interactive cards
+- Responsive grid that adapts to screen size
+- Quick access to audio and PDF resources
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Portfolio Dashboard" icon="grid">
+    Present multiple works in an organized grid view
+  </Card>
+  
+  <Card title="Category Organization" icon="folder">
+    Use tabs to group works by type, year, or genre
+  </Card>
+  
+  <Card title="Quick Navigation" icon="bolt">
+    Cards provide instant visual scanning and selection
+  </Card>
+  
+  <Card title="Modern UI" icon="sparkles">
+    Contemporary card-based interface familiar to users
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Layout**: Responsive card grid (1-3 columns)
+- **Cards**: Elevated cards with hover effects
+- **Tabs**: Horizontal tab navigation for categories
+- **Typography**: Sans-serif with clear hierarchy
+- **Theme**: Light and dark modes with smooth transitions
+
+## Generation Example
+
+```bash
+# Generate with Cards & Tabs skin
+praetorius generate --skin cards-tabs
+
+# Using alias
+praetorius generate --skin dashboard
+```
+
+## Configuration
+
+Set Cards & Tabs as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "cards-tabs",
+    "allowUrlOverride": true
+  },
+  "theme": "light",
+  "site": {
+    "fullName": "Your Name",
+    "listLabel": "Works List"
+  }
+}
+```
+
+## Key Features
+
+### Card Grid Layout
+Works displayed as interactive cards with title, description preview, and action buttons.
+
+### Tabbed Organization
+Optional tab navigation to organize works into categories (requires configuration).
+
+### Hover Interactions
+Cards lift and highlight on hover, providing clear interactive feedback.
+
+### Responsive Grid
+Automatically adjusts from single column (mobile) to multi-column (desktop).
+
+### Quick Actions
+Each card includes direct buttons for playing audio and viewing PDFs.
+
+## HTML Structure
+
+```html
+<main class="ct-dashboard">
+  <nav class="ct-tabs">
+    <button class="ct-tab ct-tab-active">All Works</button>
+    <button class="ct-tab">Chamber</button>
+    <button class="ct-tab">Orchestra</button>
+  </nav>
+  
+  <div class="ct-grid">
+    <article class="ct-card">
+      <h2 class="ct-card-title">Work Title</h2>
+      <p class="ct-card-description">Work description...</p>
+      <div class="ct-card-actions">
+        <button class="ct-btn-play">Play</button>
+        <a class="ct-btn-pdf" href="...">View Score</a>
+      </div>
+    </article>
+    <!-- More cards... -->
+  </div>
+</main>
+```
+
+## CSS Classes
+
+- `.ct-dashboard` - Main container
+- `.ct-tabs` - Tab navigation bar
+- `.ct-tab` - Individual tab button
+- `.ct-grid` - Card grid container
+- `.ct-card` - Individual work card
+- `.ct-card-actions` - Button group in card
+
+## Grid Configuration
+
+The grid adapts automatically:
+- Mobile: 1 column
+- Tablet: 2 columns
+- Desktop: 3 columns
+
+## Aliases
+
+The `dashboard` alias can be used interchangeably:
+
+```bash
+praetorius generate --skin dashboard
+```
+
+## Source Location
+
+Implementation: `source/ui/skins/cards-tabs/`
+- `template.html` - Dashboard structure
+- `style.css` - Card and grid styles
+- `main.js` - Tab switching and card interactions
+
+<Tip>
+Cards & Tabs works best with 6-12 works. For larger catalogs, consider adding search or filtering.
+</Tip>

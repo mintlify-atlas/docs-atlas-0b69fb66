@@ -1,80 +1,332 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Create your first interactive works portfolio with PDF page-follow in under 5 minutes."
 ---
 
-## Get started in three steps
+## Overview
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This guide walks you through the complete workflow: installing Praetorius, creating a project, adding a work with page-follow mapping, generating output, and previewing the result.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Estimated time: **5 minutes** (assuming you already have Node.js >= 18.17 installed).
 </Note>
+
+## Complete workflow
+
+<Steps>
+  <Step title="Install Praetorius globally">
+    Install Praetorius so you have the `prae` command available everywhere:
+    
+    <CodeGroup>
+    
+    ```bash npm
+    npm install -g praetorius
+    ```
+    
+    ```bash yarn
+    yarn global add praetorius
+    ```
+    
+    ```bash pnpm
+    pnpm add -g praetorius
+    ```
+    
+    </CodeGroup>
+    
+    Verify it's installed:
+    
+    ```bash
+    prae --version
+    ```
+    
+    <Tip>
+    New to command-line tools? Don't worry—Praetorius uses a guided wizard that asks you questions instead of requiring you to write code.
+    </Tip>
+  </Step>
+  
+  <Step title="Initialize a new project">
+    Create a directory for your portfolio and initialize Praetorius:
+    
+    ```bash
+    mkdir my-portfolio && cd my-portfolio
+    prae init --out dist
+    ```
+    
+    This creates:
+    
+    - **`.prae/works.json`** — Your works database (if it doesn't exist)
+    - **`dist/`** — Output directory for generated assets
+    
+    <Info>
+    The `--out dist` flag tells Praetorius where to write generated files. You can use any directory name (`build`, `public`, etc.).
+    </Info>
+  </Step>
+  
+  <Step title="Add a work (guided prompts)">
+    Use the interactive wizard to add your first work:
+    
+    ```bash
+    prae add
+    ```
+    
+    The CLI will prompt you for:
+    
+    - **Title**: e.g., `String Quartet No. 2 — SOUNDNOISEMUSIC`
+    - **Slug**: URL-friendly identifier (auto-generated from title)
+    - **One-liner**: Short description (1-2 sentences, max 240 chars)
+    - **Audio URL**: Direct link to your MP3/OGG file
+    - **PDF URL**: Direct link to your score PDF
+    - **Cues**: Optional timestamps with labels (e.g., `@10:30` for a jump point)
+    - **Page-follow mapping** (optional but powerful):
+      - `pdfStartPage`: The PDF page number where printed page 1 appears
+      - `mediaOffsetSec`: Offset if your recording doesn't start at 0:00
+      - `pageMap`: Waypoints like `{ at: "7:49", page: 10 }` to sync time → printed page
+    
+    <Accordion title="Example: Adding a work with page-follow">
+    ```bash
+    $ prae add
+    
+    ? Title: String Quartet No. 2 — SOUNDNOISEMUSIC
+    ? Slug: soundnoisemusic
+    ? One-liner: A through-composed/indeterminate quartet exploring...
+    ? Audio URL: https://example.com/audio/quartet.mp3
+    ? PDF URL: https://example.com/scores/quartet.pdf
+    ? Add cues? (y/N): y
+      ? Cue label: Movement II
+      ? Time (mm:ss or seconds): 5:30
+    ? Configure page-follow? (Y/n): y
+      ? PDF start page (where printed p.1 appears): 11
+      ? Media offset (seconds, negative if pre-roll): 0
+      ? Add page waypoint? (Y/n): y
+        ? Time (mm:ss): 0:30
+        ? Printed page number: 1
+      ? Add another waypoint? (Y/n): y
+        ? Time (mm:ss): 1:00
+        ? Printed page number: 2
+      ? Add another waypoint? (y/N): n
+    
+    ✓ Work added: String Quartet No. 2 — SOUNDNOISEMUSIC
+    ```
+    </Accordion>
+    
+    <Warning>
+    Page-follow requires **direct PDF URLs** (not Google Drive preview links). For Drive files, use the direct download URL format or host via a CDN.
+    </Warning>
+  </Step>
+  
+  <Step title="Generate output assets">
+    Transform your works data into paste-ready JavaScript and CSS:
+    
+    ```bash
+    prae generate --out dist
+    ```
+    
+    This creates:
+    
+    - **`dist/script.js`** — Your works data + runtime logic
+    - **`dist/styles.css`** — Theme tokens and layout styles
+    - **`dist/index.html`** — Preview file (optional)
+    
+    <Info>
+    By default, `generate` uses the **console** skin. You can choose a different presentation style with `--skin`:
+    
+    ```bash
+    prae generate --skin vite-breeze --out dist
+    prae generate --skin typefolio --out dist
+    prae generate --skin cards-tabs --out dist
+    ```
+    
+    Available skins: `console`, `vite-breeze`, `typefolio`, `cards-tabs`, `docs-reader`, `kiosk`, `typescatter`
+    </Info>
+    
+    ### Generate a single embed snippet
+    
+    For site builders like Squarespace, you can generate a self-contained HTML snippet:
+    
+    ```bash
+    prae generate --embed > embed.html
+    ```
+    
+    Then paste the contents of `embed.html` into a **Code block** in your site builder.
+  </Step>
+  
+  <Step title="Preview your portfolio">
+    Open the generated `dist/index.html` file in a browser to see your works console in action.
+    
+    Or, if you prefer a local server:
+    
+    ```bash
+    # Using Python
+    cd dist && python3 -m http.server 8000
+    
+    # Using Node.js (http-server)
+    npx http-server dist -p 8000
+    
+    # Using PHP
+    cd dist && php -S localhost:8000
+    ```
+    
+    Then visit `http://localhost:8000` in your browser.
+    
+    <Tip>
+    The **Play/Pause** button should trigger audio playback. If you configured page-follow, the PDF viewer will snap to the correct page as the audio plays.
+    </Tip>
+  </Step>
+</Steps>
+
+## Integrate with your site
+
+Once you've previewed and confirmed everything works, integrate your portfolio into your website:
+
+<Tabs>
+  <Tab title="Squarespace (and similar)">
+    ### Using the embed snippet
+    
+    1. Generate the embed:
+       ```bash
+       prae generate --embed > embed.html
+       ```
+    2. Copy the contents of `embed.html`
+    3. In Squarespace, add a **Code Block** to your page
+    4. Paste the snippet
+    5. Save and publish
+    
+    ### Using hosted assets
+    
+    1. Upload `dist/script.js` and `dist/styles.css` to your site's file storage or a CDN
+    2. Add a **Code Block** with:
+       ```html
+       <link rel="stylesheet" href="https://your-site.com/path/to/styles.css">
+       <section id="works-console"></section>
+       <script src="https://your-site.com/path/to/script.js"></script>
+       ```
+    
+    <Note>
+    This approach avoids theme collisions and works anywhere a Code/HTML block is allowed.
+    </Note>
+  </Tab>
+  
+  <Tab title="Static site (Netlify, Vercel, etc.)">
+    ### Copy generated assets
+    
+    1. Copy the entire `dist/` directory to your site's public folder:
+       ```bash
+       cp -r dist/* path/to/your-site/public/
+       ```
+    2. Reference in your HTML template:
+       ```html
+       <link rel="stylesheet" href="/styles.css">
+       <section id="works-console"></section>
+       <script src="/script.js"></script>
+       ```
+    3. Deploy as usual (`git push`, `netlify deploy`, etc.)
+    
+    <Tip>
+    Praetorius generates static assets with no build step required—just copy and deploy.
+    </Tip>
+  </Tab>
+  
+  <Tab title="WordPress / Webflow">
+    ### Using custom HTML blocks
+    
+    1. Generate the embed:
+       ```bash
+       prae generate --embed > embed.html
+       ```
+    2. In WordPress:
+       - Add a **Custom HTML** block
+       - Paste the embed snippet
+    3. In Webflow:
+       - Add an **Embed** element
+       - Paste the embed snippet
+    4. Save and publish
+    
+    <Warning>
+    Some WordPress themes may strip `<script>` tags for security. If your embed doesn't work, use the **hosted assets** approach instead (upload files to Media Library, reference via Custom HTML).
+    </Warning>
+  </Tab>
+</Tabs>
+
+## What's next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Add more works"
+    icon="plus"
+    href="/guides/adding-works"
+  >
+    Add additional works to your portfolio using the `prae add` wizard.
+  </Card>
+  
+  <Card
+    title="Configure page-follow"
+    icon="file-pdf"
+    href="/concepts/page-follow"
+  >
+    Master the page-follow mapping system to sync PDFs with audio perfectly.
+  </Card>
+  
+  <Card
+    title="Choose a skin"
+    icon="palette"
+    href="/concepts/skins"
+  >
+    Explore all 7 built-in presentation skins and find the best fit for your portfolio.
+  </Card>
+  
+  <Card
+    title="Import existing data"
+    icon="file-import"
+    href="/guides/data-import-export"
+  >
+    Bulk import works from CSV, JSON, or YAML files.
+  </Card>
+</CardGroup>
+
+## Common next actions
+
+<AccordionGroup>
+  <Accordion title="How do I edit a work after adding it?" icon="pen">
+    Use the `prae edit` command:
+    
+    ```bash
+    prae edit
+    ```
+    
+    You'll be prompted to select a work by ID or slug, then guided through updating its fields.
+  </Accordion>
+  
+  <Accordion title="How do I remove a work?" icon="trash">
+    Use the `prae rm` command:
+    
+    ```bash
+    prae rm
+    ```
+    
+    Select the work to remove, confirm, and it's deleted from `.prae/works.json`.
+  </Accordion>
+  
+  <Accordion title="How do I reorder works?" icon="arrow-up-arrow-down">
+    Use the `prae order` command:
+    
+    ```bash
+    prae order
+    ```
+    
+    You'll be prompted to rearrange works interactively.
+  </Accordion>
+  
+  <Accordion title="Can I validate my works data?" icon="circle-check">
+    Yes! Use the `prae doctor` command:
+    
+    ```bash
+    prae doctor
+    ```
+    
+    This validates your schema, checks mappings, and prints actionable guidance for any issues.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+**Stuck or found a bug?** Check the [troubleshooting guide](/troubleshooting) or open an issue on [GitHub](https://github.com/cbassuarez/praetorius/issues).
+</Tip>

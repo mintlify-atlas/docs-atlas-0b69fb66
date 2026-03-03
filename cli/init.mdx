@@ -1,0 +1,140 @@
+---
+title: prae init
+description: Create starter files and initialize Praetorius project structure
+---
+
+# prae init
+
+Create starter script.js, styles.css, and seed configuration files for a new Praetorius project.
+
+## Syntax
+
+```bash
+prae init [options]
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `-o, --out <dir>` | Output directory for starter files | `prae-out` |
+| `--dry-run` | Print actions without writing files | `false` |
+| `-f, --force` | Overwrite files if they exist | `false` |
+| `--wizard` | Run site configuration wizard after init | `false` |
+
+## Behavior
+
+The `init` command creates three starter files:
+
+1. **script.js** - Starter JavaScript with demo work (Gymnopédie)
+2. **styles.css** - Base CSS with theme tokens
+3. **README.txt** - Quick reference for next steps
+
+Additionally, if `.prae/works.json` and `.prae/config.json` don't exist, they are created with default values.
+
+## Examples
+
+### Basic initialization
+
+```bash
+prae init
+```
+
+Creates starter files in `prae-out/` directory.
+
+### Custom output directory
+
+```bash
+prae init -o my-project
+```
+
+### Preview without writing
+
+```bash
+prae init --dry-run
+```
+
+Shows planned file operations without creating files.
+
+### Initialize and configure site
+
+```bash
+prae init --wizard
+```
+
+Runs the site configuration wizard after creating starter files.
+
+### Force overwrite existing files
+
+```bash
+prae init --force
+```
+
+## Output
+
+```
+Praetorius init
+Target: prae-out
+Mode:   write
+Force:  off
+
+write prae-out/script.js
+write prae-out/styles.css
+write prae-out/README.txt
+write .prae/works.json
+write .prae/config.json
+
+Next steps:
+  • Add works: praetorius add
+  • Generate:  praetorius generate
+  • Read:      README.md → Skins, Theming & Tokens, PDF + HUD, Accessibility
+```
+
+## Files Created
+
+### .prae/works.json
+
+Empty works database:
+
+```json
+{
+  "version": 1,
+  "works": []
+}
+```
+
+### .prae/config.json
+
+Default configuration:
+
+```json
+{
+  "theme": "dark",
+  "output": {
+    "minify": false,
+    "embed": false
+  },
+  "ui": {
+    "skin": "console"
+  },
+  "site": {
+    "firstName": "",
+    "lastName": "",
+    "listLabel": "Works List"
+  }
+}
+```
+
+## Notes
+
+<Note>
+- Existing files are preserved unless `--force` is specified
+- `.bak` backup files are created automatically when overwriting
+- The starter script includes a single demo work to verify setup
+</Note>
+
+## See Also
+
+- [prae add](/cli/add) - Add works interactively
+- [prae generate](/cli/generate) - Generate output files
+- [Works JSON](/configuration/works-json) - Configure your works database

@@ -1,0 +1,450 @@
+---
+title: Deep Linking
+description: URL structure and query parameters for linking directly to specific works and timestamps
+---
+
+Deep linking allows you to link directly to a specific work or timestamp in your Praetorius portfolio. This is essential for sharing, citations, program notes, and social media.
+
+## URL Structure
+
+Praetorius supports two types of deep links:
+
+1. **Work anchor links** — Jump to a specific work
+2. **Time query parameters** — Jump to a work and start at a specific time
+
+## Work Anchor Links
+
+### Format
+
+```
+https://your-site.com/works#work-<slug>
+```
+
+The anchor format uses the work's `slug` field from works.json:
+
+```json
+{
+  "id": 1,
+  "slug": "string-quartet-no-2",
+  "title": "String Quartet No. 2"
+}
+```
+
+Deep link:
+```
+https://your-site.com/works#work-string-quartet-no-2
+```
+
+### How It Works
+
+1. User clicks the deep link
+2. Page loads and reads the URL hash
+3. Praetorius UI finds the work with matching slug
+4. Scrolls to that work's section
+5. Optionally auto-expands/focuses the work (skin-dependent)
+
+### Example Usage
+
+**HTML Link:**
+```html
+<a href="https://your-site.com/works#work-string-quartet-no-2">
+  Listen to String Quartet No. 2
+</a>
+```
+
+**Markdown:**
+```markdown
+Check out my [String Quartet No. 2](https://your-site.com/works#work-string-quartet-no-2)
+```
+
+**Social Media:**
+```
+New quartet premiere!
+https://your-site.com/works#work-string-quartet-no-2
+```
+
+## Time Query Parameters
+
+### Format
+
+```
+https://your-site.com/works#work-<slug>?t=<seconds>
+```
+
+The `t` query parameter specifies the start time in **seconds**:
+
+```
+https://your-site.com/works#work-string-quartet-no-2?t=630
+```
+
+This links to the work and seeks to 10:30 (630 seconds).
+
+### How It Works
+
+1. Page loads and reads URL hash + query string
+2. Finds the work by slug
+3. Loads the work's audio element
+4. Seeks to the specified time (`audio.currentTime = t`)
+5. Optionally auto-plays (user gesture required on some browsers)
+
+### Supported Time Formats
+
+Only **integer seconds** are supported in the `t` parameter:
+
+| Time | Seconds | URL Parameter |
+|------|---------|---------------|
+| 0:00 | 0 | `?t=0` |
+| 1:30 | 90 | `?t=90` |
+| 10:30 | 630 | `?t=630` |
+| 1:05:45 | 3945 | `?t=3945` |
+
+<Info>To convert `mm:ss` to seconds: `(minutes × 60) + seconds`</Info>
+
+### Example Usage
+
+**Link to a specific cue:**
+```html
+<a href="https://your-site.com/works#work-string-quartet-no-2?t=630">
+  Jump to the Coda (10:30)
+</a>
+```
+
+**Share a timestamp:**
+```
+Listen to this moment at 7:49:
+https://your-site.com/works#work-string-quartet-no-2?t=469
+```
+
+## Combining Work + Time
+
+You can combine both the work slug and time parameter:
+
+```
+https://your-site.com/works#work-soundnoisemusic?t=420
+```
+
+This:
+1. Jumps to the "soundnoisemusic" work
+2. Seeks audio to 7:00 (420 seconds)
+3. Ready to play from that point
+
+## Generating Deep Links Programmatically
+
+### JavaScript Helper
+
+If you're building custom UI, use this helper:
+
+```javascript
+function buildDeepLink(baseUrl, slug, timeSeconds = null) {
+  let url = `${baseUrl}#work-${slug}`;
+  if (timeSeconds !== null) {
+    url += `?t=${Math.floor(timeSeconds)}`;
+  }
+  return url;
+}
+
+// Examples
+buildDeepLink('https://my-site.com/works', 'string-quartet-no-2');
+// => "https://my-site.com/works#work-string-quartet-no-2"
+
+buildDeepLink('https://my-site.com/works', 'string-quartet-no-2', 630);
+// => "https://my-site.com/works#work-string-quartet-no-2?t=630"
+```
+
+### From Cues
+
+If your work has cues defined:
+
+```json
+{
+  "cues": [
+    { "label": "Movement II", "t": 420 },
+    { "label": "Coda", "t": 630 }
+  ]
+}
+```
+
+Generate links:
+```javascript
+const work = { slug: 'string-quartet-no-2', cues: [...] };
+
+work.cues.forEach(cue => {
+  const link = buildDeepLink('https://my-site.com/works', work.slug, cue.t);
+  console.log(`${cue.label}: ${link}`);
+});
+
+// Output:
+// Movement II: https://my-site.com/works#work-string-quartet-no-2?t=420
+// Coda: https://my-site.com/works#work-string-quartet-no-2?t=630
+```
+
+## Reading Deep Links in Custom UI
+
+If you're building custom UI on top of Praetorius, here's how to parse deep links:
+
+### JavaScript Example
+
+```javascript
+function parseDeepLink() {
+  const hash = window.location.hash; // e.g., "#work-string-quartet-no-2"
+  const search = window.location.search; // e.g., "?t=630"
+  
+  // Extract slug
+  const workMatch = hash.match(/^#work-(.+)$/);
+  const slug = workMatch ? workMatch[1] : null;
+  
+  // Extract time
+  const params = new URLSearchParams(search);
+  const timeStr = params.get('t');
+  const time = timeStr ? parseInt(timeStr, 10) : null;
+  
+  return { slug, time };
+}
+
+// Usage
+const { slug, time } = parseDeepLink();
+if (slug) {
+  console.log(`Navigate to work: ${slug}`);
+  if (time !== null) {
+    console.log(`Seek to: ${time} seconds`);
+  }
+}
+```
+
+### On Page Load
+
+```javascript
+window.addEventListener('DOMContentLoaded', () => {
+  const { slug, time } = parseDeepLink();
+  
+  if (slug) {
+    const work = findWorkBySlug(slug);
+    if (work) {
+      activateWork(work);
+      
+      if (time !== null) {
+        const audio = document.getElementById(work.audioId);
+        if (audio) {
+          audio.currentTime = time;
+          // Note: auto-play may require user gesture
+        }
+      }
+    }
+  }
+});
+```
+
+## URL Fragment vs. Query String
+
+Praetorius uses the **URL fragment** (hash) for work slugs and **query parameters** for time:
+
+```
+https://example.com/works#work-<slug>?t=<seconds>
+                        ^^^^^^^^^^^^^ ^^^^^^^^^^^
+                        fragment      query string
+```
+
+**Why this structure?**
+
+- **Fragment:** Client-side only, doesn't trigger page reloads
+- **Query string:** Easily parsed and passed to analytics/tracking
+- **Combined:** Works on static sites, single-page apps, and traditional servers
+
+<Info>Both parts are optional. You can link to just a work (`#work-slug`) or theoretically just a time (`?t=630`), though the latter is not recommended without a work slug.</Info>
+
+## SEO Considerations
+
+### Canonical URLs
+
+For SEO, treat the base URL as canonical:
+
+```html
+<link rel="canonical" href="https://your-site.com/works" />
+```
+
+Deep links are client-side navigation aids, not separate pages.
+
+### Open Graph Tags
+
+For social sharing, use Open Graph tags with deep links:
+
+```html
+<meta property="og:url" content="https://your-site.com/works#work-string-quartet-no-2" />
+<meta property="og:title" content="String Quartet No. 2 — SOUNDNOISEMUSIC" />
+<meta property="og:description" content="A through-composed/indeterminate quartet..." />
+```
+
+### Schema.org Markup
+
+For structured data:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "MusicComposition",
+  "name": "String Quartet No. 2",
+  "url": "https://your-site.com/works#work-string-quartet-no-2",
+  "audio": {
+    "@type": "AudioObject",
+    "contentUrl": "https://cdn.example.com/audio/sq2.mp3"
+  }
+}
+```
+
+## Browser Compatibility
+
+| Feature | Chrome | Firefox | Safari | Edge |
+|---------|--------|---------|--------|------|
+| Hash navigation | ✅ | ✅ | ✅ | ✅ |
+| Query params | ✅ | ✅ | ✅ | ✅ |
+| Audio seek | ✅ | ✅ | ✅ | ✅ |
+| Auto-play | ⚠️* | ⚠️* | ⚠️* | ⚠️* |
+
+*Auto-play requires user interaction in most modern browsers. Deep links will seek to the correct time, but the user must click play.
+
+## Best Practices
+
+### 1. Use Descriptive Slugs
+
+**Good:**
+```json
+"slug": "string-quartet-no-2-soundnoisemusic"
+```
+
+**Bad:**
+```json
+"slug": "work1"
+```
+
+### 2. Validate Slugs on Import
+
+Ensure slugs are:
+- Lowercase
+- Hyphen-separated
+- URL-safe (no spaces, special characters)
+- Unique across all works
+
+### 3. Provide UI for Copying Links
+
+Add "Share" buttons that copy deep links:
+
+```javascript
+function copyDeepLink(slug, time = null) {
+  const url = buildDeepLink(window.location.origin + '/works', slug, time);
+  navigator.clipboard.writeText(url);
+  alert('Link copied!');
+}
+```
+
+### 4. Show Current Time in UI
+
+Display the current time as a shareable link:
+
+```javascript
+audio.addEventListener('timeupdate', () => {
+  const currentTime = Math.floor(audio.currentTime);
+  const link = buildDeepLink(baseUrl, work.slug, currentTime);
+  shareButton.href = link;
+});
+```
+
+### 5. Handle Missing Works Gracefully
+
+If a slug doesn't match any work:
+
+```javascript
+const work = findWorkBySlug(slug);
+if (!work) {
+  console.warn(`Work not found: ${slug}`);
+  // Fallback: show all works or display an error message
+}
+```
+
+## Analytics Integration
+
+Track deep link usage with analytics:
+
+```javascript
+function trackDeepLink(slug, time) {
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'deep_link', {
+      work_slug: slug,
+      start_time: time,
+      page_path: window.location.pathname + window.location.hash
+    });
+  }
+}
+
+const { slug, time } = parseDeepLink();
+if (slug) {
+  trackDeepLink(slug, time);
+}
+```
+
+## Common Use Cases
+
+### Program Notes
+
+```html
+<p>
+  My <a href="/works#work-string-quartet-no-2">String Quartet No. 2</a>
+  explores the boundary between sound and noise.
+</p>
+```
+
+### Email Newsletters
+
+```
+New premiere recording!
+Listen to the full work:
+https://your-site.com/works#work-string-quartet-no-2
+
+Or jump to the Coda at 10:30:
+https://your-site.com/works#work-string-quartet-no-2?t=630
+```
+
+### Social Media
+
+```
+🎵 New quartet premiere!
+Listen at 10:30 for the wildest moment:
+https://your-site.com/works#work-string-quartet-no-2?t=630
+```
+
+### Academic Citations
+
+```
+Suarez, S. (2024). String Quartet No. 2 — SOUNDNOISEMUSIC [Audio recording].
+Retrieved from https://your-site.com/works#work-string-quartet-no-2
+```
+
+## Troubleshooting
+
+### Link doesn't jump to work
+
+Check:
+1. Is the slug correct and matching works.json?
+2. Is the UI listening for hash changes?
+3. Is JavaScript enabled?
+
+### Time parameter ignored
+
+Check:
+1. Is `t` a valid integer?
+2. Is the audio element loaded?
+3. Is the time within the audio duration?
+
+### Auto-play not working
+
+<Warning>
+Most browsers block auto-play without user interaction. Deep links will seek to the correct time, but users must click play manually.
+</Warning>
+
+**Workaround:** Show a "Play from [time]" button when a time parameter is detected.
+
+## Related
+
+- [works.json Reference](/configuration/works-json)
+- [Score Mapping Configuration](/configuration/score-mapping)
+- [Embedding Guide](/guides/embedding)
+- [Squarespace Integration](/guides/squarespace-integration)

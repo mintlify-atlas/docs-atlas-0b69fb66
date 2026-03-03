@@ -1,0 +1,266 @@
+---
+title: prae doctor
+description: Validate database, config, and optionally check URLs and CORS
+---
+
+# prae doctor
+
+Validate `.prae/works.json` and `.prae/config.json` against schemas. Optionally check audio/PDF URLs and CORS headers.
+
+## Syntax
+
+```bash
+prae doctor [options]
+```
+
+## Options
+
+### Database Validation Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--json` | Machine-readable JSON report | `false` |
+| `-q, --quiet` | Suppress OK messages | `false` |
+
+### URL Check Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--urls` | Enable URL/CORS checking | `false` |
+| `--offline` | Skip network calls | `false` |
+| `--timeout <ms>` | Per-URL timeout in milliseconds | `4500` |
+| `--no-exit-urls` | Don't set exit code for URL errors | `false` |
+
+## Validation Checks
+
+### Schema Validation
+
+- **Required fields** - All works have `id`, `slug`, `title`, and `oneliner`/`description`
+- **Data types** - IDs are integers, URLs are strings, etc.
+- **Field constraints** - Oneliner ≤240 chars, IDs ≥1, etc.
+
+### Duplicate Detection
+
+- **Duplicate IDs** - No two works share the same numeric ID
+- **Duplicate slugs** - No two works share the same slug
+
+### Config Validation
+
+- **Theme** - Must be `"light"` or `"dark"`
+- **Output flags** - `minify` and `embed` are booleans
+
+## Examples
+
+### Basic validation
+
+```bash
+prae doctor
+```
+
+Output:
+
+```
+doctor: OK
+works: 5, theme: dark, minify:false, embed:false
+```
+
+### Quiet mode
+
+```bash
+prae doctor --quiet
+```
+
+No output if validation passes. Exits with code 0.
+
+### JSON report
+
+```bash
+prae doctor --json
+```
+
+```json
+{
+  "ok": true,
+  "errors": [],
+  "counts": {
+    "works": 5
+  }
+}
+```
+
+### With URL checks
+
+```bash
+prae doctor --urls
+```
+
+```
+doctor: OK
+works: 5, theme: dark, minify:false, embed:false
+urls: 0 error(s), 2 warn(s)
+```
+
+Requires `src/cli/doctor.js` module (see URL Checking section below).
+
+### Check URLs offline
+
+```bash
+prae doctor --urls --offline
+```
+
+Validates URL format without making HTTP requests.
+
+## Error Examples
+
+### Schema Errors
+
+```bash
+prae doctor
+```
+
+```
+doctor: issues found
+  - schema /works/0/title: must NOT have fewer than 1 characters
+  - schema /works/1/id: must be integer
+```
+
+Exit code: 1
+
+### Duplicate IDs
+
+```bash
+prae doctor
+```
+
+```
+doctor: issues found
+  - duplicate id: duplicate ids: 3, 7
+```
+
+### Invalid Theme
+
+```bash
+prae doctor
+```
+
+```
+doctor: issues found
+  - config theme: theme must be "light" or "dark"
+```
+
+## JSON Report Format
+
+```json
+{
+  "ok": false,
+  "errors": [
+    {
+      "type": "schema",
+      "where": "/works/0/title",
+      "msg": "must NOT have fewer than 1 characters"
+    },
+    {
+      "type": "duplicate",
+      "where": "id",
+      "msg": "duplicate ids: 3, 5"
+    }
+  ],
+  "counts": {
+    "works": 8
+  }
+}
+```
+
+## URL Checking
+
+The `--urls` flag enables optional URL validation. Requires a custom `doctor.js` module:
+
+### Implementation
+
+Create `src/cli/doctor.js`:
+
+```javascript
+export async function doctor(argv) {
+  // argv: ['--offline', '--timeout=4500', '--no-exit']
+  const offline = argv.includes('--offline');
+  const timeout = argv.find(a => a.startsWith('--timeout='))?.split('=')[1] || 4500;
+  const noExit = argv.includes('--no-exit');
+
+  // Load works.json
+  // Check audio/pdf URLs
+  // Test CORS headers
+  // Detect Google Drive links
+
+  return { errors: 0, warns: 2 };
+}
+```
+
+### What to Check
+
+- **HTTP status codes** - 200 OK, 403 Forbidden, 404 Not Found
+- **CORS headers** - `Access-Control-Allow-Origin`
+- **Content-Type** - `audio/*`, `application/pdf`
+- **Google Drive links** - Warn about common sharing issues
+- **Broken links** - Unreachable URLs
+
+### Example Output
+
+```bash
+prae doctor --urls
+```
+
+```
+doctor: OK
+works: 5, theme: dark, minify:false, embed:false
+urls: 1 error(s), 3 warn(s)
+  error: #2 audio URL returned 403 Forbidden
+  warn: #1 PDF may have CORS issues (no Access-Control-Allow-Origin)
+  warn: #3 audio is Google Drive link (ensure public sharing enabled)
+  warn: #4 PDF returned 301 redirect (consider updating to direct URL)
+```
+
+Exit code: 1 (due to error)
+
+### Skip Exit Code
+
+```bash
+prae doctor --urls --no-exit-urls
+```
+
+URL errors won't affect exit code (useful in CI).
+
+## Use Cases
+
+### Pre-Generate Validation
+
+```bash
+prae doctor && prae generate --minify
+```
+
+Only generate if validation passes.
+
+### CI/CD Pipeline
+
+```yaml
+# .github/workflows/validate.yml
+- name: Validate Praetorius DB
+  run: prae doctor --json > doctor-report.json
+```
+
+### Automated Testing
+
+```bash
+#!/bin/bash
+prae doctor --quiet
+if [ $? -ne 0 ]; then
+  echo "Validation failed!"
+  exit 1
+fi
+```
+
+## See Also
+
+- [prae validate](/cli/validate) - Schema validation + narrative warnings
+- [prae list](/cli/list) - Review works
+- [prae generate](/cli/generate) - Build output (validates automatically)
+- [Works JSON](/configuration/works-json) - Data schema reference

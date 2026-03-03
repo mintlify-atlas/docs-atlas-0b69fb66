@@ -1,0 +1,127 @@
+---
+title: Vite Breeze Skin
+description: Liquid glass portfolio shell with split layout and integrated PDF viewer pane
+---
+
+# Vite Breeze Skin
+
+The **Vite Breeze** skin is a sophisticated portfolio layout featuring a liquid glass aesthetic, split-pane design, and integrated PDF viewer.
+
+## Overview
+
+Vite Breeze provides a modern, professional portfolio experience with:
+- Split layout: works list on the left, PDF viewer on the right
+- Glass-morphism design with backdrop blur effects
+- Integrated in-page PDF viewer (no popups)
+- Smooth theme toggle with animated sun/moon icons
+- Responsive navigation and footer
+
+## When to Use
+
+<CardGroup cols={2}>
+  <Card title="Portfolio Sites" icon="briefcase">
+    Showcase your works with a polished, professional layout
+  </Card>
+  
+  <Card title="Score Presentation" icon="file-pdf">
+    Display musical scores alongside audio with side-by-side viewing
+  </Card>
+  
+  <Card title="Modern Aesthetics" icon="palette">
+    When you want contemporary glass-morphism visual effects
+  </Card>
+  
+  <Card title="Desktop Experience" icon="desktop">
+    Optimized for larger screens with split-pane navigation
+  </Card>
+</CardGroup>
+
+## Visual Style
+
+- **Design**: Liquid glass with saturated blur and transparency
+- **Layout**: Split shell (list + PDF pane)
+- **Typography**: System UI fonts with clean hierarchy
+- **Theme Toggle**: Animated switch with sun/moon icons
+- **PDF Viewer**: Embedded iframe with close button
+
+## Generation Example
+
+```bash
+# Generate with Vite Breeze skin
+praetorius generate --skin vite-breeze
+
+# Or configure as default
+praetorius config set ui.skin vite-breeze
+praetorius generate
+```
+
+## Configuration
+
+Set Vite Breeze as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "vite-breeze",
+    "allowUrlOverride": true
+  },
+  "theme": "light",
+  "site": {
+    "fullName": "Your Name",
+    "subtitle": "Selected works",
+    "copyrightName": "Your Name",
+    "links": [
+      { "label": "Home", "href": "/", "external": false },
+      { "label": "Contact", "href": "/contact", "external": false }
+    ]
+  }
+}
+```
+
+## Key Features
+
+### Split Layout
+Works list (`#works-console`) on the left, PDF pane (`.vb-pdfpane`) on the right.
+
+### Glass Morphism
+Backdrop blur and saturation effects for modern depth and layering.
+
+### Integrated PDF Viewer
+In-page iframe viewer with header bar and close button—no external popups.
+
+### Theme Toggle
+Smooth animated toggle between light and dark modes with icon transitions.
+
+### Responsive Header
+Brand display, navigation links, theme toggle, and "Powered by Praetorius" badge.
+
+## HTML Structure
+
+```html
+<header class="vb-header">
+  <div class="vb-brand">
+    <div class="vb-title">Your Name</div>
+    <div class="vb-sub">Selected works</div>
+  </div>
+  <button id="wc-theme-toggle" class="vb-theme-toggle">...</button>
+  <nav class="vb-nav">...</nav>
+</header>
+
+<main class="vb-shell">
+  <section id="works-console" class="vb-list"></section>
+  <aside class="vb-pdfpane">
+    <iframe class="vb-pdf-frame"></iframe>
+  </aside>
+</main>
+```
+
+## Source Location
+
+Implementation: `source/ui/skins/vite-breeze/`
+- `template.html` - HTML structure with split shell
+- `style.css` - Glass morphism styles
+- `main.js` - PDF viewer and theme logic
+
+<Tip>
+Vite Breeze is ideal for composer portfolios where score viewing alongside audio is essential.
+</Tip>

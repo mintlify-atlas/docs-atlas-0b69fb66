@@ -1,0 +1,300 @@
+---
+title: Squarespace Integration
+description: Specific guide for embedding Praetorius in Squarespace with troubleshooting tips
+---
+
+Squarespace is a popular site builder for artists and composers. This guide covers Squarespace-specific setup, best practices, and common issues.
+
+## Why Squarespace?
+
+From the README:
+
+> Praetorius is designed to drop into Squarespace (or any site builder) via a single code block.
+
+Squarespace's **Code Block** feature allows you to inject custom HTML/CSS/JS without theme modifications. This avoids:
+- Theme version conflicts
+- Plugin dependencies
+- Breaking changes during Squarespace updates
+
+## Setup Guide
+
+<Steps>
+  <Step title="Generate the embed snippet">
+    Run this in your project directory:
+    ```bash
+    prae generate --embed > embed.html
+    ```
+
+    This creates a self-contained HTML file with:
+    - Inline CSS (theme tokens + UI styles)
+    - Inline JavaScript (your works data + runtime)
+    - HUD component (for playback display)
+  </Step>
+
+  <Step title="Open your Squarespace site editor">
+    - Log in to Squarespace
+    - Navigate to **Pages** → Select your target page
+    - Click **Edit** to enter page editor
+  </Step>
+
+  <Step title="Add a Code block">
+    - Click the **+** icon where you want works to appear
+    - Search for "Code"
+    - Select **Code** block from the list
+  </Step>
+
+  <Step title="Paste the embed snippet">
+    - Open `embed.html` in a text editor
+    - Copy **all contents** (Ctrl+A, Ctrl+C)
+    - Paste into the Code block
+    - Ensure **Display source code** is set to **OFF**
+  </Step>
+
+  <Step title="Configure block settings">
+    In the Code block settings:
+    - **Display source code**: OFF (must be off for runtime execution)
+    - **Code Type**: HTML
+    - Width: Full width recommended
+  </Step>
+
+  <Step title="Save and preview">
+    - Click **Save** in the page editor
+    - Click **Preview** to test in a new tab
+    - Verify works appear and audio plays
+    - If everything works, click **Publish**
+  </Step>
+</Steps>
+
+## Theme Integration
+
+Praetorius includes strict light/dark theme tokens. Match your Squarespace theme:
+
+```bash
+# For dark Squarespace themes
+prae generate --embed --theme dark > embed.html
+
+# For light Squarespace themes
+prae generate --embed --theme light > embed.html
+```
+
+### Custom CSS Override
+
+If theme colors don't match, add custom CSS in Squarespace:
+
+1. Go to **Design** → **Custom CSS**
+2. Add overrides:
+
+```css
+/* Override Praetorius theme tokens */
+#works-console.prae-theme-dark {
+  --bg: #1a1a1a;  /* Match your site's dark background */
+  --fg: #f0f0f0;  /* Match your site's text color */
+  --dim: #888;    /* Match your site's muted text */
+  --line: rgba(255,255,255,.15); /* Match your site's borders */
+}
+```
+
+<Tip>
+  Praetorius uses CSS variables scoped to `#works-console`, so overrides won't affect your site's other styles.
+</Tip>
+
+## PDF Hosting for Squarespace
+
+Squarespace has limitations with PDF embedding:
+
+### ✅ Recommended: Self-Host or Use CDN
+
+```bash
+# Upload PDFs to Squarespace file storage
+# Or use a CDN like jsDelivr, Cloudflare, Netlify
+```
+
+Update your `.prae/works.json`:
+```json
+{
+  "pdf": "https://yourcdn.com/scores/quartet-no-2.pdf"
+}
+```
+
+### ❌ Avoid: Google Drive Preview Links
+
+Google Drive preview iframes don't expose page control, so PDF page-follow won't work.
+
+**Instead:** Convert Drive links to direct download links:
+
+```
+# Drive preview link (won't work)
+https://drive.google.com/file/d/FILE_ID/view
+
+# Direct download link (works)
+https://drive.google.com/uc?export=download&id=FILE_ID
+```
+
+<Warning>
+  Direct download links from Google Drive may trigger browser download prompts instead of inline display. Use a proper CDN for best results.
+</Warning>
+
+## Common Issues
+
+### Works Don't Appear
+
+**Symptom:** Code block shows blank or "No works found."
+
+**Solutions:**
+
+1. **Check Display Source Code setting**
+   - Must be set to **OFF** in Code block settings
+   - If ON, code displays as text instead of executing
+
+2. **Verify embed snippet is complete**
+   - Open browser DevTools (F12) → Console
+   - Look for errors like `Uncaught SyntaxError`
+   - Re-generate and re-paste the full embed
+
+3. **Check for JavaScript errors**
+   ```javascript
+   // Console should show:
+   [prae embed] works: 3
+   ```
+   If missing, JavaScript isn't running.
+
+### CSS Not Loading / Styles Look Broken
+
+**Symptom:** Works appear but formatting is broken.
+
+**Solutions:**
+
+1. **Ensure `<style>` tag is included**
+   - The embed snippet starts with `<style>/* Praetorius... */`
+   - If missing, re-generate: `prae generate --embed`
+
+2. **Check for CSS conflicts**
+   - Squarespace themes may override styles
+   - Add `!important` flags in Custom CSS if needed:
+   ```css
+   #works-console { padding: 1rem !important; }
+   ```
+
+3. **Verify theme class**
+   - Inspect `<body>` element in DevTools
+   - Should include `prae-theme-dark` or `prae-theme-light`
+   - If missing, re-generate with `--theme` flag
+
+### Audio Won't Play
+
+**Symptom:** Click play button, nothing happens.
+
+**Solutions:**
+
+1. **Check audio URLs**
+   - Open DevTools → Network tab
+   - Click play, watch for 404 errors
+   - Update URLs in `.prae/works.json` and regenerate
+
+2. **CORS issues**
+   - If hosting audio on external domain, ensure CORS headers are set
+   - Or host audio on same domain as Squarespace site
+
+3. **Audio format compatibility**
+   - Squarespace supports MP3, OGG, M4A
+   - Avoid exotic formats
+
+### PDF Page-Follow Not Working
+
+**Symptom:** Audio plays but PDF doesn't scroll.
+
+**Solutions:**
+
+1. **Use PDF.js viewer URLs**
+   ```json
+   {
+     "pdf": "https://mozilla.github.io/pdf.js/web/viewer.html?file=https://yourcdn.com/score.pdf"
+   }
+   ```
+
+2. **Verify `score` configuration**
+   - Check `.prae/works.json` has valid `score` block
+   - Run `prae doctor` to validate mappings
+
+3. **Check iframe sandbox restrictions**
+   - Squarespace may sandbox iframes
+   - Page-follow requires `allow-scripts allow-same-origin`
+
+## Performance Optimization
+
+### Lazy Load Audio
+
+By default, Praetorius uses `preload="none"` on `<audio>` tags. Audio only loads when user clicks play.
+
+### Minify Output
+
+For faster page loads:
+
+```bash
+prae generate --embed --minify > embed.html
+```
+
+Reduces file size by ~30-40%.
+
+### Host Assets Externally (Advanced)
+
+If you have many works (10+), consider hosting `script.js` separately:
+
+```bash
+# Generate normal output
+prae generate --out dist
+
+# Upload dist/script.js and dist/styles.css to CDN
+# Then use a minimal Code block:
+```
+
+```html
+<link rel="stylesheet" href="https://yourcdn.com/styles.css">
+<section id="works-console"></section>
+<script src="https://yourcdn.com/script.js"></script>
+```
+
+## Accessibility on Squarespace
+
+Praetorius includes:
+- **ARIA labels**: Buttons have `aria-label` attributes
+- **Keyboard navigation**: Arrow keys, Escape to close
+- **Live regions**: HUD uses `aria-live="polite"`
+
+Squarespace's default skip-links work with Praetorius—no extra config needed.
+
+## Updating Your Works
+
+To update published works:
+
+<Steps>
+  <Step title="Edit your data">
+    ```bash
+    prae edit  # Or edit .prae/works.json directly
+    ```
+  </Step>
+
+  <Step title="Regenerate embed">
+    ```bash
+    prae generate --embed > embed.html
+    ```
+  </Step>
+
+  <Step title="Update Code block">
+    - Open Squarespace page editor
+    - Click into the existing Code block
+    - Select all (Ctrl+A) and delete
+    - Paste new `embed.html` contents
+    - Save and publish
+  </Step>
+</Steps>
+
+<Tip>
+  Keep your `.prae/` directory in version control (Git). This makes it easy to roll back changes or sync across devices.
+</Tip>
+
+## Next Steps
+
+- [Embedding in other platforms](/guides/embedding)
+- [PDF page-follow configuration](/concepts/page-follow)
+- [Troubleshooting guide](/troubleshooting)

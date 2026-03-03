@@ -1,0 +1,334 @@
+---
+title: Data Import & Export
+description: Bulk import and export works using JSON and CSV formats
+---
+
+Praetorius provides `prae import` and `prae export` commands for bulk operations. Use these to migrate data, share catalogs, or integrate with external tools.
+
+## Export Command
+
+Export your works database to JSON or CSV.
+
+### JSON Export (Default)
+
+```bash
+prae export
+```
+
+Outputs the entire `.prae/works.json` to stdout:
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "soundnoisemusic",
+      "title": "String Quartet No. 2 — SOUNDNOISEMUSIC",
+      "oneliner": "A through-composed/indeterminate quartet...",
+      "audio": "https://cdn.example.com/audio.mp3",
+      "pdf": "https://cdn.example.com/score.pdf",
+      "cues": [
+        { "label": "@10:30", "t": 630 }
+      ]
+    }
+  ]
+}
+```
+
+**Save to file:**
+```bash
+prae export > backup.json
+```
+
+### CSV Export
+
+```bash
+prae export --format csv > works.csv
+```
+
+Outputs a flattened CSV with these columns:
+
+| Column | Description | Example |
+|--------|-------------|----------|
+| `id` | Work ID (integer) | `1` |
+| `slug` | URL-friendly identifier | `soundnoisemusic` |
+| `title` | Full work title | `String Quartet No. 2` |
+| `oneliner` | Brief description | `A through-composed quartet...` |
+| `audio` | Audio URL | `https://cdn.../audio.mp3` |
+| `pdf` | PDF URL | `https://cdn.../score.pdf` |
+| `cues_json` | JSON array of cues | `[{"label":"@10:30","t":630}]` |
+| `score_json` | JSON object of page-follow config | `{"pdfStartPage":1,...}` |
+
+<Tip>
+  Complex fields like `cues` and `score` are serialized as JSON strings. Edit carefully in spreadsheet software.
+</Tip>
+
+## Import Command
+
+Import works from JSON or CSV files.
+
+### JSON Import
+
+```bash
+prae import works.json
+```
+
+Expected format:
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "work-slug",
+      "title": "Work Title",
+      "oneliner": "Brief description",
+      "audio": "https://...",
+      "pdf": "https://...",
+      "cues": [
+        { "label": "@0:00", "t": 0 }
+      ],
+      "score": {
+        "pdfStartPage": 1,
+        "mediaOffsetSec": 0,
+        "pageMap": [
+          { "at": "0:30", "page": 1 }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Partial JSON (works array only):**
+
+```bash
+# If your file only contains the works array:
+echo '{"version":1,"works":'$(cat works-array.json)'}' | prae import /dev/stdin
+```
+
+### CSV Import
+
+```bash
+prae import works.csv --format csv
+```
+
+Required CSV columns:
+- `title` (required)
+- `slug` (required, or auto-generated from title)
+- `oneliner` (required)
+
+Optional columns:
+- `id` (leave blank to auto-assign)
+- `audio`
+- `pdf`
+- `cues_json` (JSON array string)
+- `score_json` (JSON object string)
+
+**Example CSV:**
+
+```csv
+id,slug,title,oneliner,audio,pdf,cues_json,score_json
+1,quartet-no-2,"String Quartet No. 2","A through-composed quartet...",https://cdn.../audio.mp3,https://cdn.../score.pdf,"[{""label"":""@10:30"",""t"":630}]","{""pdfStartPage"":1}"
+2,symphony,"Symphony in D","A three-movement work...",https://cdn.../symphony.mp3,https://cdn.../symphony.pdf,"[]",""
+```
+
+<Warning>
+  CSV import requires the `csv-parse` package:
+  ```bash
+  npm install csv-parse
+  ```
+  The CLI will prompt if missing.
+</Warning>
+
+## Import Behavior
+
+### ID Assignment
+
+- **If ID provided and unique**: Uses the provided ID
+- **If ID missing or duplicate**: Auto-assigns next available ID
+- **IDs < 1**: Rejected and auto-assigned
+
+```bash
+# Example: importing works with IDs 1, 2, 5
+# Existing works have IDs 1, 2, 3
+# Result: imported works get IDs 4, 5, 6 (1 and 2 conflict, 5 is allowed)
+```
+
+### Slug Conflicts
+
+- If slug exists, CLI skips the work and warns:
+  ```
+  Warning: Slug "quartet-no-2" already exists. Skipping row.
+  ```
+
+- Modify slug in source file or remove existing work:
+  ```bash
+  prae rm quartet-no-2
+  prae import works.csv
+  ```
+
+### Required Fields
+
+Import validates:
+- `title` (non-empty)
+- `slug` (non-empty, or auto-generated)
+- `oneliner` OR `description` (at least one)
+
+Rows missing required fields are skipped with warnings.
+
+## Import Modes
+
+### Merge (Default)
+
+Adds imported works to existing database:
+
+```bash
+prae import new-works.json
+# Existing works preserved, new works added
+```
+
+### Replace (Advanced)
+
+<Warning>
+  Replace mode overwrites your entire `.prae/works.json`. Back up first!
+</Warning>
+
+To replace all works:
+
+```bash
+# Backup first
+cp .prae/works.json .prae/works.json.bak
+
+# Clear existing works manually, then import
+echo '{"version":1,"works":[]}' > .prae/works.json
+prae import new-works.json
+```
+
+## History Snapshots
+
+Imports automatically create history snapshots:
+
+```bash
+# After import
+ls .prae/history/
+# 2026-03-03T10-30-00-000Z--before-import.json
+```
+
+Restore if needed:
+
+```bash
+cp .prae/history/2026-03-03T10-30-00-000Z--before-import.json .prae/works.json
+```
+
+<Tip>
+  History files are timestamped and labeled. Check `.prae/history/` after any bulk operation.
+</Tip>
+
+## Common Workflows
+
+### Backup Before Editing
+
+```bash
+prae export > backup-$(date +%Y%m%d).json
+```
+
+### Share Catalog with Collaborators
+
+```bash
+# Export
+prae export > works-catalog.json
+
+# Send file to collaborator
+# They import:
+prae import works-catalog.json
+```
+
+### Migrate from Spreadsheet
+
+<Steps>
+  <Step title="Export spreadsheet to CSV">
+    Use Google Sheets, Excel, or Numbers:
+    - File → Download → CSV
+    - Ensure columns match Praetorius schema
+  </Step>
+
+  <Step title="Validate CSV structure">
+    Required columns:
+    - `title`
+    - `slug`
+    - `oneliner`
+  </Step>
+
+  <Step title="Import">
+    ```bash
+    prae import works.csv --format csv
+    ```
+  </Step>
+
+  <Step title="Verify">
+    ```bash
+    prae list
+    ```
+  </Step>
+</Steps>
+
+### Bulk Edit in External Tool
+
+```bash
+# Export to CSV
+prae export --format csv > works.csv
+
+# Edit in Excel/Google Sheets/etc.
+# (Change URLs, fix typos, etc.)
+
+# Clear existing works
+echo '{"version":1,"works":[]}' > .prae/works.json
+
+# Re-import
+prae import works.csv --format csv
+```
+
+## Data Validation
+
+Before import, the CLI:
+- Checks required fields
+- Validates `score` block structure
+- Ensures `cues` times are non-negative integers
+- Warns about duplicate slugs
+
+After import, run:
+
+```bash
+prae doctor
+```
+
+This validates:
+- Schema compliance
+- Page-follow mappings
+- URL reachability (optional)
+
+## Supported Formats
+
+| Format | Import | Export | Notes |
+|--------|--------|--------|-------|
+| JSON | ✅ | ✅ | Full schema support |
+| CSV | ✅ | ✅ | Complex fields as JSON strings |
+| YAML | ❌ | ❌ | Not yet supported |
+| Excel | ❌ | ❌ | Export to CSV first |
+
+<Tip>
+  For YAML support, convert to JSON first using external tools like `yq`:
+  ```bash
+  yq eval -o=json works.yaml > works.json
+  prae import works.json
+  ```
+</Tip>
+
+## Next Steps
+
+- [Validate data with `prae doctor`](/cli/doctor)
+- [Edit individual works](/guides/adding-works)
+- [Generate output](/guides/generating-output)

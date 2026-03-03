@@ -1,0 +1,151 @@
+---
+title: prae list
+description: Display all works from the database
+---
+
+# prae list
+
+Display all works from `.prae/works.json` with formatted output showing IDs, titles, slugs, summaries, and media URLs.
+
+## Syntax
+
+```bash
+prae list
+```
+
+## Options
+
+No options available.
+
+## Output Format
+
+For each work, displays:
+
+1. **ID and title** (cyan ID, bold title)
+2. **Slug** (gray, in parentheses)
+3. **Summary** (oneliner or auto-derived from description)
+4. **Array position** (order in database)
+5. **Media URLs** (audio and PDF if present)
+6. **Cue points** (if any)
+7. **Score mapping** (if configured)
+
+## Examples
+
+### List all works
+
+```bash
+prae list
+```
+
+```
+Works
+#1 String Quartet No. 2  (string-quartet-2)
+   A through-composed quartet exploring timbre   [order=1]
+   audio: https://example.com/audio.mp3
+   pdf:   https://example.com/score.pdf
+   cues:  @0:00=0s, @5:30=330s
+   score: p1→PDF 3, offset 0s, map 2 rows
+
+#2 Piano Sonata  (piano-sonata)
+   Modern approach to sonata form   [order=2]
+   audio: https://example.com/piano.mp3
+   cues:  @0:00=0s, @3:45=225s, @7:20=440s
+
+#3 Symphony No. 1  (symphony-1)
+   Four-movement orchestral work   [order=3]
+   pdf:   https://example.com/symphony-score.pdf
+```
+
+### Empty database
+
+```bash
+prae list
+```
+
+```
+No works yet. Add with: praetorius add
+```
+
+## Field Descriptions
+
+### Order Index
+
+The `[order=N]` shows position in the works array. This determines:
+
+- Display sequence in generated UI
+- Tab order in interactive skins
+- List order in navigation menus
+
+Change order with `prae order`.
+
+### Summary Line
+
+The summary comes from:
+
+1. **Explicit oneliner** - if set, used verbatim
+2. **Auto-derived from description** - first ~160 chars, stripped of Markdown
+3. **Title fallback** - if neither oneliner nor description present
+
+### Cues Format
+
+Cues display as `label=seconds`:
+
+```
+cues: @0:00=0s, @5:30=330s, Introduction=120s
+```
+
+### Score Summary
+
+Score info shown as:
+
+```
+score: p1→PDF 3, offset 0s, map 5 rows
+```
+
+Meaning:
+- Printed page 1 = PDF page 3
+- Media offset: 0 seconds
+- 5 time-to-page mappings
+
+For full page-follow details, see [Score Mapping](/configuration/score-mapping).
+
+## Filtering and Searching
+
+The CLI doesn't support built-in filtering. Use standard Unix tools:
+
+### Find works by keyword
+
+```bash
+prae list | grep -i "quartet"
+```
+
+### Count total works
+
+```bash
+prae export --format=json | jq '.works | length'
+```
+
+### List only IDs and titles
+
+```bash
+prae list | grep "^#"
+```
+
+## Comparison with Export
+
+For machine-readable output:
+
+```bash
+prae export --format=json
+prae export --format=csv
+```
+
+See [prae export](/cli/export) for details.
+
+## See Also
+
+- [prae add](/cli/add) - Add works
+- [prae edit](/cli/edit) - Edit works
+- [prae order](/cli/order) - Reorder works
+- [prae export](/cli/export) - Export as JSON/CSV
+- [prae validate](/cli/validate) - Check for issues

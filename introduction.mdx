@@ -1,0 +1,132 @@
+---
+title: "Interactive Works Portfolio with PDF Page-Follow"
+description: "Praetorius is a composer-focused toolchain for publishing score-centric portfolio pages with synchronized audio and PDF page-follow—built to keep evaluators focused on the work itself."
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.svg"
+  alt="Praetorius Hero"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.svg"
+  alt="Praetorius Hero"
+/>
+
+## What is Praetorius?
+
+Praetorius is a small, disciplined toolchain for composers, artists, educators, festivals, and universities to publish **score-centric works pages** with synchronized audio, PDF scores with automatic page-follow, deep links, and clean UIs that drop into any site builder via a single code block.
+
+<Note>
+The defining feature: while audio plays, the PDF viewer **automatically snaps to the correct printed page**—so evaluators stay synchronized with the score and aren't lost between time and page.
+</Note>
+
+## Why Praetorius exists
+
+Presenting or judging score-based works on the web often creates friction:
+
+1. The evaluator doesn't know the score intimately
+2. They get lost between media time and printed page
+3. Judgments drift to secondary aesthetics instead of the work itself
+
+Praetorius restores primary evidence: **the work as score + sound, tightly synchronized**.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="PDF Page-Follow" icon="file-pdf" iconType="duotone">
+    Automatic printed page ↔ media time mapping keeps viewers synchronized with the score as audio plays.
+  </Card>
+  
+  <Card title="Interactive CLI" icon="terminal" iconType="duotone">
+    A wizard-driven CLI writes your database and generates paste-ready assets—no manual JSON editing required.
+  </Card>
+  
+  <Card title="Multiple Skins" icon="palette" iconType="duotone">
+    Choose from 7 built-in presentation styles: console, vite-breeze, typefolio, cards-tabs, docs-reader, kiosk, or typescatter.
+  </Card>
+  
+  <Card title="Squarespace-Friendly" icon="cube" iconType="duotone">
+    Paste one snippet into a Code block—no theme collisions, no complex hosting. Works with any site builder.
+  </Card>
+  
+  <Card title="Deep Links" icon="link" iconType="duotone">
+    Link directly to a specific work with an optional start time query parameter for instant playback.
+  </Card>
+  
+  <Card title="Light/Dark Tokens" icon="circle-half-stroke" iconType="duotone">
+    Strict color tokens ensure predictable contrast in both light and dark modes.
+  </Card>
+</CardGroup>
+
+## What Praetorius does NOT do
+
+Praetorius is intentionally focused. It does not:
+
+- **Host your media** — You own and host your audio/PDF files (CDN, Google Drive, or your own server)
+- **Provide analytics** — Use your site's existing analytics solution
+- **Handle authentication** — No login system or access control
+- **Build your entire site** — Praetorius generates embeddable components for your existing site
+
+This keeps the tool lightweight, portable, and under your control.
+
+## How it works
+
+<Steps>
+  <Step title="Author works data">
+    Use the CLI wizard (`prae add`) to create entries in `.prae/works.json` with title, audio URL, PDF URL, cues, and optional page-follow mapping.
+  </Step>
+  
+  <Step title="Generate assets">
+    Run `prae generate` to emit paste-ready JavaScript and CSS from your data, or generate a single `--embed` snippet.
+  </Step>
+  
+  <Step title="Integrate anywhere">
+    Paste the generated code into Squarespace, WordPress, Webflow, or any static site builder—or host the `dist/` folder on your own server.
+  </Step>
+</Steps>
+
+## Perfect for
+
+<AccordionGroup>
+  <Accordion title="Composers and Artists" icon="music">
+    Build a professional portfolio that lets residencies, festivals, and grants committees experience your work with full score context—not just audio.
+  </Accordion>
+  
+  <Accordion title="Educators and Institutions" icon="school">
+    Publish course materials, student showcases, or institutional archives with synchronized scores and recordings.
+  </Accordion>
+  
+  <Accordion title="Festivals and Competitions" icon="trophy">
+    Create judging portals where evaluators can review submissions with scores that automatically follow the audio.
+  </Accordion>
+  
+  <Accordion title="Libraries and Archives" icon="book">
+    Present historical or contemporary works with scholarly annotations, cues, and synchronized playback.
+  </Accordion>
+</AccordionGroup>
+
+## Ready to start?
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install Praetorius globally via npm, yarn, or pnpm.
+  </Card>
+  
+  <Card
+    title="Quickstart Guide"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Build your first interactive works portfolio in 5 minutes.
+  </Card>
+</CardGroup>
+
+<Tip>
+**First time using a CLI tool?** No worries—Praetorius uses a wizard-style interface with guided prompts. Just answer questions; it writes the code for you.
+</Tip>

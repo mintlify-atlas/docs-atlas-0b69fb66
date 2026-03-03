@@ -1,0 +1,243 @@
+---
+title: prae import
+description: Import works from JSON, CSV, or YAML files
+---
+
+# prae import
+
+Import works from external files (JSON, CSV, or YAML) into `.prae/works.json`. Handles ID and slug conflicts with interactive prompts.
+
+## Syntax
+
+```bash
+prae import <file> [options]
+```
+
+## Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<file>` | Path to .json, .csv, .yaml, or .yml file |
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--assume-new-id` | Auto-assign new ID on conflict | `false` |
+| `--assume-new-slug` | Auto-append suffix on slug conflict | `false` |
+
+## Supported Formats
+
+### JSON
+
+```json
+[
+  {
+    "id": 1,
+    "slug": "work-1",
+    "title": "String Quartet",
+    "oneliner": "A beautiful piece",
+    "audio": "https://example.com/audio.mp3"
+  }
+]
+```
+
+Or wrapped:
+
+```json
+{
+  "works": [
+    { "id": 1, ... }
+  ]
+}
+```
+
+### CSV
+
+```csv
+id,slug,title,oneliner,audio,pdf,cues_json
+1,work-1,String Quartet,A beautiful piece,https://example.com/audio.mp3,,"[{""label"":""@0:00"",""t"":0}]"
+```
+
+Required columns: `id`, `slug`, `title`  
+Optional: `one`, `oneliner`, `description`, `audio`, `pdf`, `cues_json`, `score_json`
+
+### YAML
+
+```yaml
+- id: 1
+  slug: work-1
+  title: String Quartet
+  oneliner: A beautiful piece
+  audio: https://example.com/audio.mp3
+```
+
+Requires `yaml` package:
+
+```bash
+npm install yaml
+```
+
+## Dependencies
+
+| Format | Package | Install |
+|--------|---------|----------|
+| JSON | Built-in | - |
+| CSV | `csv-parse` | `npm install csv-parse` |
+| YAML | `yaml` | `npm install yaml` |
+
+## Conflict Resolution
+
+### ID Conflicts
+
+When imported work has ID matching existing work:
+
+```
+? ID 3 exists. How to import "New Work"?
+  > Overwrite existing by id
+    Assign new id
+    Skip this row
+```
+
+**Overwrite** - Replaces existing work #3 with imported data  
+**Assign new id** - Uses next available ID (e.g., 10)  
+**Skip** - Ignores this import row
+
+Use `--assume-new-id` to auto-assign without prompting.
+
+### Slug Conflicts
+
+When imported slug matches existing work:
+
+```
+? Slug "string-quartet" exists. Import "String Quartet No. 2" as…
+  > Append numeric suffix
+    Overwrite existing by slug
+    Skip this row
+```
+
+**Append suffix** - Creates `string-quartet-2`, `string-quartet-3`, etc.  
+**Overwrite** - Replaces work with matching slug  
+**Skip** - Ignores this row
+
+Use `--assume-new-slug` to auto-append without prompting.
+
+## Examples
+
+### Import JSON
+
+```bash
+prae import works.json
+```
+
+### Import CSV with auto-resolution
+
+```bash
+prae import spreadsheet.csv --assume-new-id --assume-new-slug
+```
+
+Skips all conflict prompts.
+
+### Import YAML
+
+```bash
+prae import catalog.yaml
+```
+
+### Import from URL
+
+```bash
+curl -sL https://example.com/works.json | prae import /dev/stdin
+```
+
+## CSV Column Mapping
+
+| CSV Column | Work Field | Notes |
+|------------|------------|--------|
+| `id` | `id` | Optional; auto-assigned if missing |
+| `slug` | `slug` | Required |
+| `title` | `title` | Required |
+| `one` | `oneliner` | Legacy alias for oneliner |
+| `oneliner` | `oneliner` | Single-line summary |
+| `description` | `description` | Markdown body |
+| `desc` | `description` | Alias for description |
+| `audio` | `audio` | Audio URL |
+| `pdf` | `pdf` | PDF URL |
+| `cues_json` | `cues` | JSON-encoded array |
+| `score_json` | `score` | JSON-encoded score object |
+
+### Nested JSON in CSV
+
+For complex fields in CSV:
+
+```csv
+id,title,cues_json
+1,Work Title,"[{""label"":""@0:00"",""t"":0}]"
+```
+
+## Validation
+
+Post-import validation checks:
+
+- **Schema compliance** - All required fields present
+- **Unique IDs** - No duplicate IDs after merge
+- **Unique slugs** - No duplicate slugs after merge
+
+If validation fails, import aborts:
+
+```
+Post-import validation failed:
+  - /works/5/title must NOT have fewer than 1 characters
+```
+
+Fix source file and retry.
+
+## Output
+
+```
+imported 12 row(s)
+```
+
+## Verification
+
+After import:
+
+```bash
+prae list
+```
+
+or
+
+```bash
+prae validate
+```
+
+## Data Normalization
+
+Import automatically:
+
+- **Converts time strings** - "5:30" → 330 seconds
+- **Sanitizes slugs** - Removes special characters
+- **Normalizes narrative fields** - Handles oneliner/description variants
+- **Assigns missing IDs** - Uses next available
+
+## Notes
+
+<Note>
+**Non-destructive Import**
+
+Existing works are preserved unless explicitly overwritten via conflict resolution. Import only adds or replaces selected works.
+</Note>
+
+<Note>
+**Backup Safety**
+
+Original `.prae/works.json` is saved as `.prae/works.json.bak` before write.
+</Note>
+
+## See Also
+
+- [prae export](/cli/export) - Export to JSON/CSV
+- [prae validate](/cli/validate) - Check imported data
+- [prae add](/cli/add) - Add works interactively
+- [prae list](/cli/list) - View imported works

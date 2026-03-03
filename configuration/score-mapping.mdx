@@ -1,0 +1,363 @@
+---
+title: Score Mapping Configuration
+description: Configure PDF page-follow synchronization with detailed score/pageFollow block settings
+---
+
+Score mapping enables synchronized PDF page-follow: as audio plays, the PDF viewer automatically jumps to the correct printed page. This feature is essential for score-based portfolios where evaluators need to follow along.
+
+## Concept Overview
+
+The challenge: PDF files use absolute page numbers (1, 2, 3...), but printed scores often start at a different page (front matter, title pages, etc.). Additionally, recordings may have pre-roll or announcements.
+
+Praetorius solves this with a **score mapping block** that defines:
+
+1. Where printed page 1 appears in the PDF
+2. Any time offset in the recording
+3. Waypoints mapping audio timestamps to printed pages
+
+## The `score` Block
+
+The `score` block is an optional object in each work definition. When present, it enables page-follow functionality.
+
+### Basic Structure
+
+```json
+{
+  "score": {
+    "pdfStartPage": 11,
+    "mediaOffsetSec": 0,
+    "pageMap": [
+      { "at": "0:30", "page": 1 },
+      { "at": "2:15", "page": 5 }
+    ]
+  }
+}
+```
+
+## Field Reference
+
+<ParamField path="pdfStartPage" type="integer" required>
+  The PDF page number where **printed page 1** begins.
+  
+  **Validation:**
+  - Must be ≥ 1
+  - Typically accounts for cover pages, title pages, program notes
+  
+  **Example:**
+  If your PDF has a cover page, title page, and instrumentation page, and the first page of music is PDF page 11, set:
+  ```json
+  "pdfStartPage": 11
+  ```
+</ParamField>
+
+<ParamField path="mediaOffsetSec" type="integer" default="0">
+  Time offset in seconds to align audio start time with printed page 1.
+  
+  **Can be positive or negative:**
+  - **Positive:** Recording has pre-roll (announcements, silence) before the music starts
+  - **Negative:** Recording starts mid-piece
+  - **Zero:** Recording starts exactly at bar 1 of printed page 1
+  
+  **Example (positive offset):**
+  If the recording has 10 seconds of announcements before bar 1:
+  ```json
+  "mediaOffsetSec": 10
+  ```
+  
+  **Example (negative offset):**
+  If the recording starts 5 seconds into the piece:
+  ```json
+  "mediaOffsetSec": -5
+  ```
+</ParamField>
+
+<ParamField path="pageMap" type="array" required>
+  Array of waypoints mapping audio timestamps to printed page numbers.
+  
+  Each waypoint object contains:
+  - `at`: Time in the recording (string `"mm:ss"` or integer seconds)
+  - `page`: Printed page number (integer ≥ 1)
+  
+  **Validation:**
+  - Array must not be empty
+  - Times (`at`) must be strictly increasing
+  - Pages must be monotonic (non-decreasing)
+  - Page numbers must be ≥ 1
+  
+  **Example:**
+  ```json
+  "pageMap": [
+    { "at": "0:30", "page": 1 },
+    { "at": "1:45", "page": 3 },
+    { "at": "3:20", "page": 5 },
+    { "at": "7:49", "page": 10 }
+  ]
+  ```
+  
+  <Info>You don't need a waypoint for every page—just enough to keep the viewer synchronized. Typically 3-6 waypoints per movement is sufficient.</Info>
+</ParamField>
+
+<ParamField path="pdfDelta" type="integer" optional>
+  Optional fine-tuning adjustment applied to all computed PDF page numbers.
+  
+  **Use cases:**
+  - Correct for consistent off-by-one errors
+  - Adjust for PDF viewer quirks
+  - Fine-tune after testing
+  
+  **Example:**
+  If all pages are off by +1, set:
+  ```json
+  "pdfDelta": 1
+  ```
+  
+  <Warning>Use `pdfDelta` sparingly—it's a last resort. First verify your `pdfStartPage` and `pageMap` are correct.</Warning>
+</ParamField>
+
+## Complete Example
+
+Here's a real-world example for a string quartet with complex pagination:
+
+```json
+{
+  "id": 1,
+  "slug": "string-quartet-no-2",
+  "title": "String Quartet No. 2",
+  "oneliner": "A through-composed quartet in three movements",
+  "audio": "https://cdn.example.com/audio/sq2.mp3",
+  "pdf": "https://cdn.example.com/scores/sq2.pdf",
+  "score": {
+    "pdfStartPage": 11,
+    "mediaOffsetSec": 0,
+    "pdfDelta": 0,
+    "pageMap": [
+      { "at": "0:00", "page": 1 },
+      { "at": "0:30", "page": 2 },
+      { "at": "1:15", "page": 4 },
+      { "at": "2:45", "page": 7 },
+      { "at": "4:30", "page": 10 },
+      { "at": "7:49", "page": 15 },
+      { "at": "10:30", "page": 20 }
+    ]
+  }
+}
+```
+
+**Interpretation:**
+- Printed page 1 starts at PDF page 11 (10 pages of front matter)
+- Recording starts exactly at bar 1 (no offset needed)
+- At 7:49 in the recording, the viewer jumps to printed page 15 (actual PDF page 25)
+
+## Page Calculation Formula
+
+Praetorius computes the actual PDF page using:
+
+```
+actualPdfPage = pdfStartPage + (printedPage - 1) + pdfDelta
+```
+
+**Example:**
+- `pdfStartPage = 11`
+- `printedPage = 5`
+- `pdfDelta = 0`
+
+```
+actualPdfPage = 11 + (5 - 1) + 0 = 15
+```
+
+## Time Format
+
+The `at` field in `pageMap` accepts two formats:
+
+### String Format (Recommended)
+
+```json
+{ "at": "7:49", "page": 10 }
+```
+
+Supports:
+- `"mm:ss"` (e.g., `"7:49"`)
+- `"h:mm:ss"` (e.g., `"1:23:45"`)
+
+### Integer Format
+
+```json
+{ "at": 469, "page": 10 }
+```
+
+Direct seconds (7:49 = 469 seconds).
+
+<Info>Use string format for readability. The CLI will parse it correctly.</Info>
+
+## Creating a Score Mapping
+
+### Step 1: Identify pdfStartPage
+
+1. Open your PDF in a viewer
+2. Find the first page of music (printed page 1)
+3. Note the PDF page number in the viewer
+4. Set `pdfStartPage` to this number
+
+### Step 2: Check for Media Offset
+
+1. Play the audio file
+2. Note when the first note sounds
+3. If there's silence/announcements before, set `mediaOffsetSec` to that duration
+4. If recording starts mid-piece, use a negative value
+
+### Step 3: Define Waypoints
+
+1. Play audio and follow along in the PDF
+2. At key moments (page turns, section breaks), note:
+   - Current audio time
+   - Current printed page number
+3. Add these as waypoints in `pageMap`
+
+**Recommended waypoint density:**
+- Minimum: Start and end of each movement
+- Ideal: Every 2-3 minutes or major section
+- Dense: Every page turn (overkill but very precise)
+
+### Step 4: Test & Adjust
+
+1. Run `prae generate` to rebuild
+2. Test in a browser with the PDF viewer
+3. Check that page turns happen at the right moments
+4. Use `pdfDelta` if consistently off
+
+## Using the CLI Wizard
+
+The `prae add` and `prae edit` commands include an interactive score mapping wizard:
+
+```bash
+prae add
+# ... answer title, audio, pdf prompts ...
+
+? Add score/page-follow mapping? (y/n)
+> y
+
+? PDF start page (where printed page 1 begins):
+> 11
+
+? Media offset in seconds (0 if audio starts at bar 1):
+> 0
+
+? Add page-time waypoints? (y/n)
+> y
+
+? Time (mm:ss or seconds):
+> 0:30
+
+? Printed page number:
+> 1
+
+# ... repeat for each waypoint ...
+```
+
+## Validation
+
+The CLI validates score mappings automatically:
+
+<Warning>
+**Common validation errors:**
+
+- **pdfStartPage < 1:** Must be at least 1
+- **Empty pageMap:** Must include at least one waypoint
+- **Non-increasing times:** Each waypoint must be later than the previous
+- **Non-monotonic pages:** Pages must not decrease
+- **Invalid time format:** Use `"mm:ss"` or integer seconds
+</Warning>
+
+Run validation with:
+
+```bash
+prae doctor
+```
+
+This checks all works and reports score mapping issues.
+
+## Advanced: Preview Table
+
+To see the computed PDF pages, use the doctor command:
+
+```bash
+prae doctor
+```
+
+Output includes a preview table:
+
+```
+Preview (printed → actual PDF page):
+ idx  time   printed  actual
+  1   0:30        1      11
+  2   2:15        5      15
+  3   7:49       10      20
+```
+
+## Troubleshooting
+
+### Pages are always off by one
+
+Check:
+1. Is `pdfStartPage` correct? (should match PDF viewer's page number)
+2. Are your waypoints using the correct printed page numbers?
+3. If still off, use `pdfDelta` to adjust
+
+### Pages jump erratically
+
+Check:
+1. Are times in `pageMap` strictly increasing?
+2. Are page numbers monotonic?
+3. Run `prae doctor` to validate
+
+### Page-follow doesn't work at all
+
+<Warning>
+**PDF Hosting Requirements:**
+
+- Must be a direct PDF URL (not Google Drive preview)
+- CORS must be enabled on the server
+- Use PDF.js viewer with `?file=` parameter
+- Test with a known working PDF first
+</Warning>
+
+### Recording has variable tempo
+
+For recordings with significant tempo variation:
+- Add more waypoints in the variable sections
+- Place waypoints every page or two
+- Test thoroughly with real playback
+
+## Best Practices
+
+1. **Start simple:** Begin with 3-4 waypoints, test, then add more if needed
+2. **Use round times:** Prefer `"2:00"` over `"1:57"` when close enough
+3. **Mark major sections:** Always add waypoints at movement boundaries
+4. **Test on mobile:** Page-follow behavior may differ on small screens
+5. **Document offset reasoning:** Add a comment in your work notes about why you chose a particular offset
+6. **Keep PDFs accessible:** Host on reliable CDNs with CORS enabled
+
+## Alternative: Synthesized Mapping
+
+If you don't provide a `score` block but do provide a `pdf` URL, Praetorius synthesizes a minimal mapping:
+
+```json
+{
+  "pdfStartPage": 1,
+  "mediaOffsetSec": 0
+}
+```
+
+This assumes:
+- PDF page 1 = printed page 1
+- No media offset
+- No automatic page turns (user must navigate manually)
+
+<Info>For professional portfolios, always define a complete score mapping with waypoints.</Info>
+
+## Related
+
+- [works.json Reference](/configuration/works-json)
+- [Deep Linking](/configuration/deep-linking)
+- [CLI: doctor command](/cli/doctor)
+- [Page-Follow Concept](/concepts/page-follow)

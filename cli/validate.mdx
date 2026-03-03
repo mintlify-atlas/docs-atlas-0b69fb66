@@ -1,0 +1,69 @@
+---
+title: prae validate
+description: Validate works database against schema and check for content warnings
+---
+
+# prae validate
+
+Validates the works database (`.prae/works.json`) against the JSON schema and reports narrative content warnings.
+
+## Usage
+
+```bash
+prae validate
+```
+
+## Description
+
+The `validate` command performs two levels of validation:
+
+1. **Schema Validation**: Checks that the works database conforms to the required JSON schema structure
+2. **Content Warnings**: Analyzes each work for common authoring issues and missing recommended fields
+
+## Output
+
+### Schema Validation
+
+If the schema is valid:
+```
+Schema OK — 3 works
+```
+
+If there are schema errors:
+```
+Schema errors:
+  - /works/0/id must be integer
+  - /works/1/slug must be string
+```
+
+### Content Warnings
+
+The validator checks each work for:
+- Missing or incomplete oneliner/description fields
+- Missing audio or PDF URLs
+- Empty or malformed cue points
+- Invalid page-follow mappings
+
+Example warning output:
+```
+Warnings:
+  - #1 String Quartet No. 2: No audio URL provided
+  - #2 Symphony: oneliner missing — using description fallback
+```
+
+## Exit Code
+
+- `0` - Validation passed (may still have warnings)
+- `1` - Schema validation failed
+
+## Related Commands
+
+- [`prae add`](/cli/add) - Add works to the database
+- [`prae edit`](/cli/edit) - Edit existing works
+- [`prae list`](/cli/list) - View all works
+
+## Notes
+
+- Warnings are informational and do not cause the command to fail
+- Schema errors will prevent `prae generate` from running successfully
+- Run this command before deploying to catch issues early

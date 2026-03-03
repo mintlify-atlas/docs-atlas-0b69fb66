@@ -1,0 +1,161 @@
+---
+title: prae add
+description: Interactive wizard to add works to your portfolio database
+---
+
+# prae add
+
+Launch an interactive wizard to add one or more works to `.prae/works.json`. Prompts for all required and optional fields including title, slug, narrative content, media URLs, cue points, and PDF page-follow mappings.
+
+## Syntax
+
+```bash
+prae add
+prae wizard  # alias
+```
+
+## Interactive Prompts
+
+The wizard guides you through:
+
+### Basic Fields
+
+1. **Work title** (required) - Display name for the work
+2. **Slug** (required) - URL-safe identifier (auto-generated from title)
+3. **Oneliner** (optional) - Single-line summary (~160 characters)
+4. **Description** (optional) - Longer Markdown description
+
+### Media URLs
+
+5. **Audio URL** (optional) - Link to audio recording
+6. **PDF URL** (optional) - Link to score PDF
+
+### Cue Points
+
+Optionally add audio cue markers:
+
+- **Cue label** - Display text (e.g., "@5:49" or "Recapitulation")
+- **Cue time** - Timestamp in `mm:ss` or seconds
+
+Add multiple cues as needed.
+
+### Page-Follow Mapping
+
+For PDF score synchronization:
+
+- **pdfStartPage** - Which PDF page equals printed page 1
+- **mediaOffsetSec** - Media offset in seconds (can be negative)
+- **pageMap** - Time-to-page mappings
+  - Time (mm:ss or seconds)
+  - Printed page number
+- **pdfDelta** (advanced, optional) - Fine-tune page calculations
+
+## Examples
+
+### Add a single work
+
+```bash
+prae add
+```
+
+Interactive session:
+
+```
+? Work title: String Quartet No. 2
+? Slug: string-quartet-2
+? Oneliner (optional): A through-composed quartet exploring timbre
+? Long description: ## Program Note
+
+Composed in 2023...
+? Audio URL: https://example.com/audio.mp3
+? Score PDF URL: https://example.com/score.pdf
+? Add cue points? Yes
+? Cue label: @0:00
+? Cue time: 0:00
+? Add another cue? Yes
+? Cue label: @5:30
+? Cue time: 5:30
+? Add another cue? No
+? Add PDF page-follow mapping? No
+added #1 String Quartet No. 2
+? Add another work? No
+```
+
+### Add with page-follow
+
+```bash
+prae add
+```
+
+```
+? Work title: Piano Sonata
+? Slug: piano-sonata
+...
+? Add PDF page-follow mapping? Yes
+? Printed p.1 equals PDF page (pdfStartPage): 3
+? Media offset seconds (can be negative): 0
+? Time (mm:ss or seconds): 0:00
+? Printed page number: 1
+? Add another page mapping? Yes
+? Time (mm:ss or seconds): 2:30
+? Printed page number: 3
+? Add another page mapping? No
+? Add optional pdfDelta? No
+added #2 Piano Sonata
+```
+
+## Validation
+
+The wizard performs real-time validation:
+
+- **Schema compliance** - Ensures all required fields present
+- **Narrative warnings** - Flags overly long oneliners or newlines
+- **Auto-ID assignment** - Next available integer ID
+
+## Output
+
+```
+added #1 String Quartet No. 2
+DB at .prae/works.json
+```
+
+## Narrative Field Behavior
+
+<Note>
+**Oneliner vs Description**
+
+- If no oneliner provided, compact views auto-derive from description (first ~160 chars)
+- If neither provided, title is used in compact views
+- Markdown is stripped from oneliners for display
+</Note>
+
+## Data Structure
+
+Works are appended to `.prae/works.json`:
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "string-quartet-2",
+      "title": "String Quartet No. 2",
+      "oneliner": "A through-composed quartet exploring timbre",
+      "audio": "https://example.com/audio.mp3",
+      "pdf": "https://example.com/score.pdf",
+      "cues": [
+        { "label": "@0:00", "t": 0 },
+        { "label": "@5:30", "t": 330 }
+      ]
+    }
+  ]
+}
+```
+
+## See Also
+
+- [prae edit](/cli/edit) - Edit existing works
+- [prae list](/cli/list) - View all works
+- [prae validate](/cli/validate) - Check schema compliance
+- [Score Mapping](/configuration/score-mapping) - Configure page-follow synchronization

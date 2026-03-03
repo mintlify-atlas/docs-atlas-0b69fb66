@@ -1,0 +1,222 @@
+---
+title: prae export
+description: Export works database to JSON or CSV format
+---
+
+# prae export
+
+Export `.prae/works.json` to stdout as JSON or CSV for backup, migration, or external processing.
+
+## Syntax
+
+```bash
+prae export [options]
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|----------|
+| `--format <fmt>` | Output format: `json` or `csv` | `json` |
+
+## Output Formats
+
+### JSON Format
+
+Exports complete database structure:
+
+```bash
+prae export --format json
+```
+
+```json
+{
+  "version": 1,
+  "works": [
+    {
+      "id": 1,
+      "slug": "string-quartet-2",
+      "title": "String Quartet No. 2",
+      "oneliner": "A through-composed quartet",
+      "description": "## Program Note\n\nComposed in 2023...",
+      "audio": "https://example.com/audio.mp3",
+      "pdf": "https://example.com/score.pdf",
+      "cues": [
+        { "label": "@0:00", "t": 0 },
+        { "label": "@5:30", "t": 330 }
+      ],
+      "score": {
+        "pdfStartPage": 3,
+        "mediaOffsetSec": 0,
+        "pageMap": [
+          { "at": 0, "page": 1 },
+          { "at": 150, "page": 3 }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### CSV Format
+
+Exports flat structure with JSON-encoded nested fields:
+
+```bash
+prae export --format csv
+```
+
+```csv
+id,slug,title,one,oneliner,description,audio,pdf,cues_json,score_json
+1,string-quartet-2,"String Quartet No. 2","","A through-composed quartet","## Program Note...","https://example.com/audio.mp3","https://example.com/score.pdf","[{""label"":""@0:00"",""t"":0},{""label"":""@5:30"",""t"":330}]","{""pdfStartPage"":3,""mediaOffsetSec"":0,""pageMap"":[{""at"":0,""page"":1}]}"
+```
+
+## CSV Columns
+
+| Column | Description |
+|--------|-------------|
+| `id` | Numeric work ID |
+| `slug` | URL-safe identifier |
+| `title` | Work title |
+| `one` | Legacy oneliner field |
+| `oneliner` | Single-line summary |
+| `description` | Markdown description |
+| `audio` | Audio URL |
+| `pdf` | PDF URL |
+| `cues_json` | JSON-encoded cues array |
+| `score_json` | JSON-encoded score object |
+
+## Examples
+
+### Export to file
+
+```bash
+prae export > works-backup.json
+```
+
+### Export CSV to file
+
+```bash
+prae export --format csv > works-export.csv
+```
+
+### Pretty-print JSON
+
+```bash
+prae export | jq .
+```
+
+### Pipe to other tools
+
+```bash
+prae export --format json | jq '.works[] | select(.audio)'
+```
+
+Filters works with audio.
+
+### Count works
+
+```bash
+prae export | jq '.works | length'
+```
+
+### Extract titles
+
+```bash
+prae export --format csv | cut -d, -f3
+```
+
+## Use Cases
+
+### Backup Before Major Changes
+
+```bash
+prae export > backup-$(date +%Y%m%d).json
+prae import large-update.csv --assume-new-id
+```
+
+### Migrate to Another Project
+
+```bash
+cd project-a
+prae export > ../shared-works.json
+cd ../project-b
+prae import ../shared-works.json
+```
+
+### Version Control
+
+```bash
+prae export > works-snapshot.json
+git add works-snapshot.json
+git commit -m "Snapshot works database"
+```
+
+### Spreadsheet Editing
+
+```bash
+prae export --format csv > works.csv
+# Edit in Excel/Google Sheets
+prae import works.csv --assume-new-slug
+```
+
+### Generate Documentation
+
+```bash
+prae export | jq -r '.works[] | "- \(.title) (\(.slug))"'
+```
+
+Output:
+
+```
+- String Quartet No. 2 (string-quartet-2)
+- Piano Sonata (piano-sonata)
+- Symphony No. 1 (symphony-1)
+```
+
+## CSV Handling Notes
+
+<Note>
+**Nested Data in CSV**
+
+Complex fields (`cues`, `score`) are JSON-encoded and double-quote escaped. Use CSV-aware tools for editing:
+
+- **Excel**: Use "Import Data" → "From Text/CSV"
+- **Google Sheets**: File → Import → Upload CSV
+- **`jq`**: `prae export --format csv | mlr --csv --ojson cat`
+</Note>
+
+## Comparison with List
+
+| Command | Output | Use Case |
+|---------|--------|----------|
+| `prae list` | Human-readable display | Review works |
+| `prae export --format json` | Machine-readable JSON | Backup, migration |
+| `prae export --format csv` | Spreadsheet-compatible | Bulk editing |
+
+## Re-import
+
+Exported files can be re-imported:
+
+### JSON
+
+```bash
+prae export > backup.json
+# Make changes
+prae import backup.json
+```
+
+### CSV
+
+```bash
+prae export --format csv > works.csv
+# Edit in spreadsheet
+prae import works.csv --assume-new-id --assume-new-slug
+```
+
+## See Also
+
+- [prae import](/cli/import) - Import from JSON/CSV/YAML
+- [prae list](/cli/list) - Human-readable display
+- [prae validate](/cli/validate) - Check database integrity
+- [Works JSON](/configuration/works-json) - Data schema reference

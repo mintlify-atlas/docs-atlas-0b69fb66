@@ -1,0 +1,92 @@
+---
+title: Console Skin
+description: Terminal-style console view for debugging and development scaffolds
+---
+
+# Console Skin
+
+The **Console** skin provides a minimal, terminal-style interface primarily used for debugging and starter scaffolds.
+
+## Overview
+
+The Console skin displays works in a simple line-by-line format with monospace typography, reminiscent of command-line output. It's the default fallback skin and the most lightweight option.
+
+## When to Use
+
+<AccordionGroup>
+  <Accordion title="Development & Debugging">
+    Perfect for testing data structure and verifying works.json content during development.
+  </Accordion>
+  
+  <Accordion title="Minimal Starter">
+    Used by `praetorius init` to create quick proof-of-concept demos without visual complexity.
+  </Accordion>
+  
+  <Accordion title="Backend Testing">
+    Ideal when you need to verify audio URLs, PDF links, and cue data without UI distractions.
+  </Accordion>
+</AccordionGroup>
+
+## Visual Style
+
+- **Typography**: Monospace font (system UI monospace stack)
+- **Layout**: Single-column, line-by-line output
+- **Controls**: Basic button elements
+- **Theme**: Supports light/dark with simple color variables
+
+## Generation Example
+
+```bash
+# Generate with console skin (default)
+praetorius generate
+
+# Explicitly specify console skin
+praetorius generate --skin console
+```
+
+## Configuration
+
+Set console as default in `.prae/config.json`:
+
+```json
+{
+  "ui": {
+    "skin": "console"
+  },
+  "theme": "dark"
+}
+```
+
+## CSS Variables
+
+The Console skin uses minimal theme tokens:
+
+```css
+/* Dark theme */
+--bg: #0f0f0f;
+--fg: #fff;
+--dim: #8a8a8a;
+--line: rgba(255,255,255,.18);
+
+/* Light theme */
+--bg: #ffffff;
+--fg: #0d0d0d;
+--dim: #555;
+--line: rgba(0,0,0,.18);
+```
+
+## Features
+
+- Work title and slug display
+- Oneliner/description text
+- Audio play/pause buttons
+- PDF link display
+- No fancy navigation or media controls
+
+## Source Location
+
+Implementation: `source/ui/skins/console/` (or embedded in CLI for fallback)
+
+<Note>
+The Console skin is automatically used when no other skin is specified or when running `praetorius init`.
+</Note>
