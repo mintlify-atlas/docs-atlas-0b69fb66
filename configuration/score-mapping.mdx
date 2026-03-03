@@ -152,7 +152,7 @@ Here's a real-world example for a string quartet with complex pagination:
 
 Praetorius computes the actual PDF page using:
 
-```
+```text
 actualPdfPage = pdfStartPage + (printedPage - 1) + pdfDelta
 ```
 
@@ -161,7 +161,7 @@ actualPdfPage = pdfStartPage + (printedPage - 1) + pdfDelta
 - `printedPage = 5`
 - `pdfDelta = 0`
 
-```
+```text
 actualPdfPage = 11 + (5 - 1) + 0 = 15
 ```
 
@@ -286,7 +286,7 @@ prae doctor
 
 Output includes a preview table:
 
-```
+```text
 Preview (printed → actual PDF page):
  idx  time   printed  actual
   1   0:30        1      11

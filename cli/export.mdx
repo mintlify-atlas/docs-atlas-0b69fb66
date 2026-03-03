@@ -66,7 +66,7 @@ Exports flat structure with JSON-encoded nested fields:
 prae export --format csv
 ```
 
-```csv
+```text
 id,slug,title,one,oneliner,description,audio,pdf,cues_json,score_json
 1,string-quartet-2,"String Quartet No. 2","","A through-composed quartet","## Program Note...","https://example.com/audio.mp3","https://example.com/score.pdf","[{""label"":""@0:00"",""t"":0},{""label"":""@5:30"",""t"":330}]","{""pdfStartPage"":3,""mediaOffsetSec"":0,""pageMap"":[{""at"":0,""page"":1}]}"
 ```
@@ -168,7 +168,7 @@ prae export | jq -r '.works[] | "- \(.title) (\(.slug))"'
 
 Output:
 
-```
+```text
 - String Quartet No. 2 (string-quartet-2)
 - Piano Sonata (piano-sonata)
 - Symphony No. 1 (symphony-1)

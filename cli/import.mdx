@@ -54,7 +54,7 @@ Or wrapped:
 
 ### CSV
 
-```csv
+```text
 id,slug,title,oneliner,audio,pdf,cues_json
 1,work-1,String Quartet,A beautiful piece,https://example.com/audio.mp3,,"[{""label"":""@0:00"",""t"":0}]"
 ```
@@ -92,7 +92,7 @@ npm install yaml
 
 When imported work has ID matching existing work:
 
-```
+```bash
 ? ID 3 exists. How to import "New Work"?
   > Overwrite existing by id
     Assign new id
@@ -109,7 +109,7 @@ Use `--assume-new-id` to auto-assign without prompting.
 
 When imported slug matches existing work:
 
-```
+```bash
 ? Slug "string-quartet" exists. Import "String Quartet No. 2" as…
   > Append numeric suffix
     Overwrite existing by slug
@@ -170,7 +170,7 @@ curl -sL https://example.com/works.json | prae import /dev/stdin
 
 For complex fields in CSV:
 
-```csv
+```text
 id,title,cues_json
 1,Work Title,"[{""label"":""@0:00"",""t"":0}]"
 ```
@@ -185,7 +185,7 @@ Post-import validation checks:
 
 If validation fails, import aborts:
 
-```
+```bash
 Post-import validation failed:
   - /works/5/title must NOT have fewer than 1 characters
 ```
@@ -194,7 +194,7 @@ Fix source file and retry.
 
 ## Output
 
-```
+```bash
 imported 12 row(s)
 ```
 

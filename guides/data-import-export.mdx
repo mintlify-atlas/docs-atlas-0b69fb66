@@ -129,7 +129,7 @@ Optional columns:
 
 **Example CSV:**
 
-```csv
+```text
 id,slug,title,oneliner,audio,pdf,cues_json,score_json
 1,quartet-no-2,"String Quartet No. 2","A through-composed quartet...",https://cdn.../audio.mp3,https://cdn.../score.pdf,"[{""label"":""@10:30"",""t"":630}]","{""pdfStartPage"":1}"
 2,symphony,"Symphony in D","A three-movement work...",https://cdn.../symphony.mp3,https://cdn.../symphony.pdf,"[]",""
@@ -160,7 +160,7 @@ id,slug,title,oneliner,audio,pdf,cues_json,score_json
 ### Slug Conflicts
 
 - If slug exists, CLI skips the work and warns:
-  ```
+  ```bash
   Warning: Slug "quartet-no-2" already exists. Skipping row.
   ```
 
@@ -211,7 +211,7 @@ prae import new-works.json
 
 Imports automatically create history snapshots:
 
-```bash
+```text
 # After import
 ls .prae/history/
 # 2026-03-03T10-30-00-000Z--before-import.json

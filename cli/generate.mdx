@@ -151,7 +151,7 @@ prae generate --js works-data.js --css works-theme.css
 
 ### Standard Build
 
-```
+```text
 dist/
 ├── index.html      # Main page (if template found)
 ├── script.js       # Works data + runtime
@@ -163,7 +163,7 @@ dist/
 
 ### Embed Mode
 
-```
+```text
 paste/
 └── embed.html      # Self-contained snippet
 ```
@@ -182,7 +182,7 @@ paste/
 
 Generate performs schema validation. On failure:
 
-```
+```bash
 DB validation failed:
   - /works/0/title must NOT have fewer than 1 characters
 ```
@@ -219,7 +219,7 @@ prae generate --watch
 
 Output:
 
-```
+```bash
 write dist/script.js
 write dist/styles.css
 write dist/index.html
@@ -231,7 +231,7 @@ watching .prae and ui for changes…
 
 On file change:
 
-```
+```bash
 rebuild (change: .prae/works.json)
 write dist/script.js
 Generated vite-breeze to dist (works: 4, seeded: no)
@@ -243,7 +243,7 @@ Process stays alive until Ctrl+C.
 
 When `--skin docs-reader` selected and no `.prae/docs.json` exists, the Docs Reader wizard launches automatically:
 
-```
+```bash
 Docs Reader skin selected but no docs configuration found.
 Launching Docs Reader wizard…
 ```

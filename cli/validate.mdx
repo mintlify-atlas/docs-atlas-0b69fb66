@@ -25,12 +25,12 @@ The `validate` command performs two levels of validation:
 ### Schema Validation
 
 If the schema is valid:
-```
+```bash
 Schema OK — 3 works
 ```
 
 If there are schema errors:
-```
+```bash
 Schema errors:
   - /works/0/id must be integer
   - /works/1/slug must be string
@@ -45,7 +45,7 @@ The validator checks each work for:
 - Invalid page-follow mappings
 
 Example warning output:
-```
+```bash
 Warnings:
   - #1 String Quartet No. 2: No audio URL provided
   - #2 Symphony: oneliner missing — using description fallback
