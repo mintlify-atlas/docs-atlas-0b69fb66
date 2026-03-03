@@ -1,0 +1,120 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Praetorius",
+  "projectDescription": "Interactive CLI for building composer portfolios with synchronized PDF page-follow and audio playback",
+  "theme": "palm",
+  "primaryColor": "#6366f1",
+  "lightColor": "#818cf8",
+  "darkColor": "#4f46e5",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/works-data",
+              "concepts/page-follow",
+              "concepts/skins"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/adding-works",
+              "guides/generating-output",
+              "guides/embedding",
+              "guides/squarespace-integration",
+              "guides/data-import-export"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/works-json",
+              "configuration/score-mapping",
+              "configuration/deep-linking"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI Reference",
+        "groups": [
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/init",
+              "cli/add",
+              "cli/edit",
+              "cli/remove",
+              "cli/list",
+              "cli/order",
+              "cli/generate",
+              "cli/import",
+              "cli/export",
+              "cli/doctor"
+            ]
+          },
+          {
+            "group": "Skins",
+            "pages": [
+              "skins/overview",
+              "skins/console",
+              "skins/vite-breeze",
+              "skins/typefolio",
+              "skins/cards-tabs",
+              "skins/docs-reader",
+              "skins/kiosk",
+              "skins/typescatter"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq",
+              "contributing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive CLI with guided prompts for work authoring",
+    "PDF page-follow synchronization with audio playback",
+    "Multiple UI skins (console, vite-breeze, typefolio, etc.)",
+    "JSON-based works database with schema validation",
+    "Squarespace and static site embedding",
+    "Deep linking support with time-based navigation",
+    "Data import/export (JSON, CSV)",
+    "Built-in doctor command for data validation"
+  ],
+  "publicApiSurface": [
+    "prae init",
+    "prae add",
+    "prae edit",
+    "prae rm",
+    "prae list",
+    "prae order",
+    "prae generate",
+    "prae import",
+    "prae export",
+    "prae doctor"
+  ]
+}
